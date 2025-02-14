@@ -45,6 +45,12 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'Login',
+    'events',
+    'faculty',
+    'home',
+    'members',
+    'committees',
+    
 ]
 
 MIDDLEWARE = [
