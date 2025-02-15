@@ -1,7 +1,6 @@
 from django.db import models
 from Login.models import UserProfile
-from faculty.models import Faculty
-from committees.models import Club
+
 
 # Create your models here.
 
@@ -18,7 +17,7 @@ class Event(models.Model):
     description = models.TextField()
     date_time = models.DateTimeField()
     location = models.ForeignKey('events.Location', on_delete=models.SET_NULL, null=True, blank=True, related_name='event_location')  # Allow events to exist without location
-    club = models.ForeignKey('committees.Club', on_delete=models.CASCADE)
+    club = models.ForeignKey('committees.Associations', on_delete=models.CASCADE)
     created_by = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='created_events')
     approved_by = models.ForeignKey('faculty.Faculty', on_delete=models.SET_NULL, null=True, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
