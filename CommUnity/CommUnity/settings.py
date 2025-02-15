@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-
+import os
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -70,7 +70,7 @@ ROOT_URLCONF = 'CommUnity.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -131,7 +131,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "Login/static",  # Adjust according to where you created your static folder
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -171,6 +174,8 @@ ACCOUNT_FORMS = {
     'login': 'Login.forms.CustomLoginForm',  # Custom Login Form
 }
 
+ACCOUNT_ADAPTER = "Login.account_adapter.MyAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "Login.social_adapter.MySocialAccountAdapter"
 
 
 
