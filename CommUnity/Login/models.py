@@ -14,6 +14,7 @@ class UserProfile(models.Model):
     id = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
     full_name = models.CharField(max_length=255)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    profile_picture = models.ImageField(upload_to='profile_pics/', default='profile_pics/default.jpg',null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

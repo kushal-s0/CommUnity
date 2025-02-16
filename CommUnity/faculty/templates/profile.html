@@ -1,11 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>profile</title>
-</head>
-<body>
-    <h1>test</h1>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}<title>Profile</title>{% endblock title %}
+    {% block content %}
+    {{data}}
+    <div class="profile-container">
+        <div class="profile-header">
+            <img src="https://via.placeholder.com/120" alt="User Profile Picture">
+            <h1>John Doe</h1>
+            <p>Web Developer</p>
+        </div>
+        <div class="profile-info">
+            <p><strong>Email:</strong> john.doe@example.com</p>
+            <p><strong>Location:</strong> New York, USA</p>
+            <p><strong>Bio:</strong> Passionate web developer with experience in full-stack development, always eager to learn new technologies.</p>
+        </div>
+    </div>
+    {% endblock content %}
+
+
