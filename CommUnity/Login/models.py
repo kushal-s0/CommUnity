@@ -12,6 +12,7 @@ class UserProfile(models.Model):
     )
 
     id = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
+    ssv_id = models.IntegerField(null=True, blank=True, unique=True)  # New field
     full_name = models.CharField(max_length=255)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES,default='non_participating')
     profile_picture = models.ImageField(upload_to='profile_pics/', default='profile_pics/default.jpg',null=True, blank=True)
@@ -19,4 +20,4 @@ class UserProfile(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.id.username}, {self.full_name}"
+        return f"{self.id.username}, {self.full_name}, {self.role}"
