@@ -8,11 +8,30 @@
 <body>
     <h1>Welcome to the Home Page!</h1>
 
+    <a href="{% url 'club_list' %}">View Clubs</a><br>
+    <a href="{% url 'committees_list' %}">View Committees</a>
+
     {% if user.is_authenticated %}
         <p>Hello, {{ user.email }}!</p>
         <a href="{% url 'account_logout' %}">Logout</a>
+        
+        <!-- Button visible only for core members -->
+        <button id="add-club-btn" style="display: none;" onclick="window.location.href='{% url 'add_club_committee' %}'">
+            Add Club/Committee
+        </button>
+        
+
+        <script>
+            // Simulate checking the user's role (ideally from a hidden field or API)
+            const userRole = "{{ user.userprofile.role }}";  // Assuming role is stored in userprofile
+            
+            if (userRole === 'core_member') {
+                document.getElementById('add-club-btn').style.display = 'block';
+            }
+        </script>
+
     {% else %}
-        <a href="{% url 'account_signup' %}">Sign Up</a> | 
+        <a href="{% url 'account_signup' %}">Sign Up</a> |
         <a href="{% url 'account_login' %}">Login</a>
     {% endif %}
 </body>

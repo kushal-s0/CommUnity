@@ -1,0 +1,9 @@
+<h1>{{ club.name }}</h1>
+<p>{{ club.description }}</p>
+<p>Faculty In-Charge: {{ club.faculty_incharge.id.full_name }}</p>
+
+{% if club.image %}
+    <img src="{{ club.image.url }}" alt="{{ club.name }}" style="max-width: 400px;">
+{% endif %}
+
+<a href="{% url 'club_list' %}">Back to Clubs List</a>

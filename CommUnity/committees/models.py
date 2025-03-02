@@ -14,6 +14,7 @@ class Associations(models.Model):
     type = models.CharField(max_length=15, choices=ROLE_CHOICES)
     faculty_incharge = models.ForeignKey('faculty.Faculty', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+    image = models.ImageField(upload_to='association_images/', null=True, blank=True)
 
     def __str__(self):
         return self.name

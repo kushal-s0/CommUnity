@@ -1,0 +1,15 @@
+<h1>Committees List</h1>
+
+<ul>
+    {% for committee in committees %}
+        <li>
+            <a href="{% url 'committees_detail' pk=committee.id %}">
+                {{ committee.name }}
+            </a> - {{ committee.description }} (In-Charge: {{ committee.faculty_incharge.id.full_name }})
+        </li>
+    {% empty %}
+        <li>No committees have been added yet.</li>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'home' %}">Back to Home</a>

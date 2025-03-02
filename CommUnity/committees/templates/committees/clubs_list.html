@@ -1,0 +1,15 @@
+<h1>Club List</h1>
+
+<ul>
+    {% for club in clubs %}
+        <li>
+            <a href="{% url 'club_detail' pk=club.id %}">
+                {{ club.name }}
+            </a> - {{ club.description }} (In-Charge: {{ club.faculty_incharge.id.full_name }})
+        </li>
+    {% empty %}
+        <li>No clubs have been added yet.</li>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'home' %}">Back to Home</a>
