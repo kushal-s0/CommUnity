@@ -5,8 +5,18 @@
 <p>{{ committee.description }}</p>
 <p>Faculty In-Charge: {{ committee.faculty_incharge.id.full_name }}</p>
 
+<h2>Images</h2>
 {% if committee.image %}
-    <img src="{{ committee.image.url }}" alt="{{ committee.name }}" style="max-width: 400px;">
+    <h3>Main Image</h3>
+    <img src="{{ committee.image.url }}" alt="Main Committee Image" style="max-width: 300px;">
 {% endif %}
+
+<h3>Additional Images</h3>
+{% for image in committee.images.all %}
+    <img src="{{ image.image.url }}" alt="committees Image" style="max-width: 300px;">
+{% empty %}
+    <p>No additional images uploaded.</p>
+{% endfor %}
+
 
 <a href="{% url 'committees_list' %}">Back to Committees List</a>

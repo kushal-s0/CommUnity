@@ -13,9 +13,18 @@
 <p>{{ club.description }}</p>
 <p>Faculty In-Charge: {{ club.faculty_incharge.id.full_name }}</p>
 
+<h2>Images</h2>
 {% if club.image %}
-    <img src="{{ club.image.url }}" alt="{{ club.name }}" style="max-width: 400px;">
+    <h3>Main Image</h3>
+    <img src="{{ club.image.url }}" alt="Main Club Image" style="max-width: 300px;">
 {% endif %}
+
+<h3>Additional Images</h3>
+{% for image in club.images.all %}
+    <img src="{{ image.image.url }}" alt="Club Image" style="max-width: 300px;">
+{% empty %}
+    <p>No additional images uploaded.</p>
+{% endfor %}
 
 <a href="{% url 'club_list' %}">Back to Clubs List</a>
 

@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.shortcuts import render, redirect, HttpResponse
 from .models import Associations
 from django.contrib.auth.decorators import login_required
-from .models import Faculty
+from .models import Faculty,AssociationImage
 
 from django.shortcuts import render,get_object_or_404
 from .models import Associations
@@ -27,6 +27,7 @@ def club_detail(request, pk):
     club = get_object_or_404(Associations, pk=pk)
     return render(request, 'committees/club_detail.html', {'club': club})
 
+
 @login_required
 def add_club_committee(request):
     faculties = Faculty.objects.all()
@@ -40,7 +41,6 @@ def add_club_committee(request):
             return HttpResponse("Please select a valid faculty member")
 
         try:
-            # Fetch Faculty by UserProfile's ssv_id
             faculty_incharge = Faculty.objects.get(id__ssv_id=faculty_incharge_ssv_id)
             print("Faculty In-Charge:", faculty_incharge.id.full_name)
         except Faculty.DoesNotExist:
@@ -67,6 +67,12 @@ def add_club_committee(request):
             club.image = image
 
         club.save()
+
+        # Handle multiple images
+        images = request.FILES.getlist('images')
+        for image in images:
+            AssociationImage.objects.create(association=club, image=image)
+
         return redirect('home')
 
     faculty_members = Faculty.objects.all()
