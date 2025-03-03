@@ -1,3 +1,6 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/committee_detail.css' %}">
+
 <h1>{{ committee.name }}</h1>
 <p>{{ committee.description }}</p>
 <p>Faculty In-Charge: {{ committee.faculty_incharge.id.full_name }}</p>

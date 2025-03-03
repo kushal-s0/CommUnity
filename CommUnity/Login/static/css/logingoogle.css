@@ -1,4 +1,4 @@
-/* signup.css */
+/* signin.css */
 
 body {
     font-family: Arial, sans-serif;
@@ -31,16 +31,7 @@ form {
     align-items: center;
     gap: 10px;
 }
-form ul {
-    list-style-type: none;
-    padding: 0;
-    font-size: 0.9em; /* Smaller size for form lists */
-    color: #CCCCCC;
-    margin: 1px;
-}
-form ul li {
-    margin: 5px 0;
-}
+
 div {
     background: #003459;
     padding: 20px;
@@ -52,23 +43,6 @@ div {
     top: 20px;
     right: 20px;
     width: 150px;
-}
-
-form p {
-    margin: 0;
-    width: 100%;
-    text-align: left;
-}
-
-input[type="email"],
-input[type="password"] {
-    padding: 10px;
-    margin: 5px 0;
-    border: 1px solid #007EA7;
-    border-radius: 5px;
-    width: calc(100% - 22px);
-    background: #FFFFFF;
-    color: #00171F;
 }
 
 button {
@@ -85,19 +59,6 @@ button {
 
 button:hover {
     background: #003459;
-}
-
-hr {
-    margin: 20px 0;
-    border: 0;
-    height: 1px;
-    background: #007EA7;
-}
-
-.helptext {
-    font-size: 0.9em;
-    color: #00A8E8;
-    text-align: left;
 }
 
 ul {
@@ -120,27 +81,7 @@ a:hover {
     color: #007EA7;
 }
 
-h2 {
-    color: #ffffff;
-    margin-top: 20px;
-}
-
-a[title="Google"] {
-    color: #FFFFFF;
-    font-weight: bold;
-}
-
-a[title="Google"]:hover {
-    color: #003459;
-}
-a[title="Google"]::before {
-    content: "";
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    background: url('/static/images/google.png') no-repeat center/contain;
-    background-color: #fff; /* Add white background */
-    border-radius: 50%; /* Make it circular */
-    margin-right: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional shadow */
+p {
+    margin: 20px 0;
+    font-size: 1.1em;
 }

@@ -70,7 +70,8 @@ ROOT_URLCONF = 'CommUnity.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates','faculty/templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'),
+                os.path.join(BASE_DIR, 'faculty/templates'),],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -134,6 +135,10 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "Login/static",  # Adjust according to where you created your static folder
+    BASE_DIR / "committees/static",
+    # BASE_DIR / "faculty/static",
+    # BASE_DIR / "events/static",
+    # BASE_DIR / "members/static",
 ]
 
 # Default primary key field type

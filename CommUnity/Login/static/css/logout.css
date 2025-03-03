@@ -1,4 +1,4 @@
-/* signup.css */
+/* logout.css */
 
 body {
     font-family: Arial, sans-serif;
@@ -12,7 +12,7 @@ body {
     color: #FFFFFF;
     text-align: center;
     box-sizing: border-box;
-    flex-direction: column;
+    flex-direction: column; 
 }
 
 h1 {
@@ -20,6 +20,7 @@ h1 {
     margin-bottom: 20px;
 }
 
+/* Form styling */
 form {
     background: rgba(0, 23, 31, 0.8);
     padding: 20px;
@@ -31,16 +32,7 @@ form {
     align-items: center;
     gap: 10px;
 }
-form ul {
-    list-style-type: none;
-    padding: 0;
-    font-size: 0.9em; /* Smaller size for form lists */
-    color: #CCCCCC;
-    margin: 1px;
-}
-form ul li {
-    margin: 5px 0;
-}
+
 div {
     background: #003459;
     padding: 20px;
@@ -51,26 +43,10 @@ div {
     position: absolute;
     top: 20px;
     right: 20px;
-    width: 150px;
+    width: 200px;
 }
 
-form p {
-    margin: 0;
-    width: 100%;
-    text-align: left;
-}
-
-input[type="email"],
-input[type="password"] {
-    padding: 10px;
-    margin: 5px 0;
-    border: 1px solid #007EA7;
-    border-radius: 5px;
-    width: calc(100% - 22px);
-    background: #FFFFFF;
-    color: #00171F;
-}
-
+/* Button styling */
 button {
     background: linear-gradient(90deg, #007EA7, #00A8E8);
     color: #FFFFFF;
@@ -87,19 +63,7 @@ button:hover {
     background: #003459;
 }
 
-hr {
-    margin: 20px 0;
-    border: 0;
-    height: 1px;
-    background: #007EA7;
-}
-
-.helptext {
-    font-size: 0.9em;
-    color: #00A8E8;
-    text-align: left;
-}
-
+/* List styling */
 ul {
     list-style-type: none;
     padding: 0;
@@ -118,29 +82,4 @@ a {
 a:hover {
     text-decoration: underline;
     color: #007EA7;
-}
-
-h2 {
-    color: #ffffff;
-    margin-top: 20px;
-}
-
-a[title="Google"] {
-    color: #FFFFFF;
-    font-weight: bold;
-}
-
-a[title="Google"]:hover {
-    color: #003459;
-}
-a[title="Google"]::before {
-    content: "";
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    background: url('/static/images/google.png') no-repeat center/contain;
-    background-color: #fff; /* Add white background */
-    border-radius: 50%; /* Make it circular */
-    margin-right: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional shadow */
 }

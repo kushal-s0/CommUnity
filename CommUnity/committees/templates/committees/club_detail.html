@@ -1,3 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ club.name }}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/club_details.css' %}">
+</head>
+<body>
+
 <h1>{{ club.name }}</h1>
 <p>{{ club.description }}</p>
 <p>Faculty In-Charge: {{ club.faculty_incharge.id.full_name }}</p>
@@ -7,3 +18,6 @@
 {% endif %}
 
 <a href="{% url 'club_list' %}">Back to Clubs List</a>
+
+</body>
+</html>

@@ -1,42 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Club/Committee</title>
-</head>
-<body>
-    <h1>Add a New Club or Committee</h1>
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <label for="name">Name:</label>
-        <input type="text" name="name" required><br>
-    
-        <label for="description">Description:</label>
-        <textarea name="description" required></textarea><br>
-    
-        <label for="type">Type:</label>
-        <select name="type">
-            <option value="clubs">Club</option>
-            <option value="committees">Committee</option>
-        </select><br>
-    
-        <label for="faculty_incharge">Select Faculty In-Charge:</label>
-        <select name="faculty_incharge">
-            <option value="">Select Faculty</option>
-            {% for faculty in faculty_members %}
-                <option value="{{ faculty.id.ssv_id }}">{{ faculty.id.full_name }} ({{ faculty.id.ssv_id }})</option>
-            {% endfor %}
-        </select>        
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Add Club/Committee</title>
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'css/add_club.css' %}">
+    </head>
+    <body>
+        <h1>Add a New Club or Committee</h1>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="name">Name:</label>
+            <input type="text" name="name" required><br>
+        
+            <label for="description">Description:</label>
+            <textarea name="description" required></textarea><br>
+        
+            <label for="type">Type:</label>
+            <select name="type">
+                <option value="clubs">Club</option>
+                <option value="committees">Committee</option>
+            </select><br>
+        
+            <label for="faculty_incharge">Select Faculty In-Charge:</label>
+            <select name="faculty_incharge">
+                <option value="">Select Faculty</option>
+                {% for faculty in faculty_members %}
+                    <option value="{{ faculty.id.ssv_id }}">{{ faculty.id.full_name }} ({{ faculty.id.ssv_id }})</option>
+                {% endfor %}
+            </select>        
+            
+
+            <label for="image">Image (optional):</label>
+            <input type="file" name="image"><br>
+        
+            <button type="submit">Create</button>
+        </form>
         
 
-        <label for="image">Image (optional):</label>
-        <input type="file" name="image"><br>
-    
-        <button type="submit">Create</button>
-    </form>
-    
-
-    <a href="{% url 'home' %}">Back to Home</a>
-</body>
-</html>
+        <a href="{% url 'home' %}">Back to Home</a>
+    </body>
+    </html>
