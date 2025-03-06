@@ -6,6 +6,7 @@ new committees and club list add kardiya hai and club add karne ke liye core mem
 faculty email verification hold pe rakha hai badme karege
 <br>
 #tasks
+<br>
 Sagar - faculty 
 Aditya - homepage frontend
 Pragati - homepage backend 
