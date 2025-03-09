@@ -17,15 +17,28 @@ def club_list(request):
 
 def committees_list(request):
     committees = Associations.objects.filter(type='committees')
+    request.session['url'] = 'committees_list'
     return render(request, 'committees/committees_list.html', {'committees': committees})
 
 def committees_detail(request, pk):
     committee = get_object_or_404(Associations, pk=pk)
-    return render(request, 'committees/committee_detail.html', {'committee': committee})
+    url = request.session.get('url')
+    print(url)
+    context = {
+        'committee': committee,
+        'url': url
+    }
+    return render(request, 'committees/committee_detail.html', context)
 
 def club_detail(request, pk):
     club = get_object_or_404(Associations, pk=pk)
-    return render(request, 'committees/club_detail.html', {'club': club})
+    url = request.session.get('url')
+    print(url)
+    context = {
+        'club': club,
+        'url': url
+    }
+    return render(request, 'committees/club_detail.html', context)
 
 
 @login_required

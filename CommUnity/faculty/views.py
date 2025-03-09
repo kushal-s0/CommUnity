@@ -24,9 +24,9 @@ def faculty_committee(request):
         clubs = [a for a in associations if a.type == 'clubs']
         committees = [a for a in associations if a.type == 'committees']
                 
+        request.session['url'] = 'faculty'
         content = {'clubs': clubs, 'comm': committees}
         return render(request, 'committee.html', content)
-    
     except (UserProfile.DoesNotExist, Faculty.DoesNotExist):
         # Handle case where user isn't associated with faculty
         content = {'clubs': [], 'comm': []}

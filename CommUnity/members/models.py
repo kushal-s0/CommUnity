@@ -12,7 +12,7 @@ class CoreMember(models.Model):
     can_approve_members = models.BooleanField(default=False)
     can_edit_events = models.BooleanField(default=False)
     can_edit_club_page = models.BooleanField(default=False)
-    permissions = models.JSONField(default=list)
+    permissions = models.JSONField(default=list, blank=True)
 
     def add_permission(self, permission):
         if permission not in self.permissions:
@@ -27,7 +27,7 @@ class CoreMember(models.Model):
     def has_permission(self, permission):
         return permission in self.permissions
     def __str__(self):
-        return self.id,self.id.full_name,self.club
+        return f"{self.id},{self.id.full_name},{self.club}"
     
 # Members Model
 class Member(models.Model):
