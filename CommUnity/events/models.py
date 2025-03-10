@@ -1,5 +1,6 @@
 from django.db import models
 from Login.models import UserProfile
+from members.models import CoreMember
 
 
 # Create your models here.
@@ -23,13 +24,23 @@ class Event(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
 
     def __str__(self):
-        return self.title, self.date_time, self.club
+        return f"{self.id},{self.title},{self.date_time},{self.club}" 
 
 # Location Model
 # Location Model
 class Location(models.Model):
+    LOCATION = (
+        ('online', 'Online'),
+        ('auditorium', 'Auditorium'),
+        ('open canteen', 'Open Canteen'),
+        ('turf', 'Turf'),
+        ('vidya vihar', 'Vidya Vihar'),
+        ('other', 'Other')
+    )
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255)
+    location = models.CharField(max_length=255,choices=LOCATION, default='other')
+    if location == 'other':
+        location = models.CharField(max_length=255)
     booked_from = models.DateTimeField()
     booked_to = models.DateTimeField()
     event = models.ForeignKey('Event', on_delete=models.CASCADE, null=True, blank=True, related_name='event_location')
@@ -37,4 +48,4 @@ class Location(models.Model):
 
 
     def __str__(self):
-        return self.name
+        return f"{self.name}"

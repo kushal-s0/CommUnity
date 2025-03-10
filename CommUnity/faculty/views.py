@@ -9,7 +9,8 @@ def faculty_view(request):
 def profile_view(request):   
 
     return render(request, 'profile.html')
-
+def committee_member_view( request):
+    return render(request, 'committee_member.html')
 
 def faculty_committee(request):
     try:

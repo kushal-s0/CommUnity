@@ -1,6 +1,7 @@
 from django.db import models
 from faculty.models import Faculty
 from members.models import CoreMember
+from Login.models import UserProfile
 
 # Associations Model
 class Associations(models.Model):
@@ -17,7 +18,7 @@ class Associations(models.Model):
     image = models.ImageField(upload_to='association_images/', null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.name}"
 # Announcements Model
 class Announcement(models.Model):
     id = models.AutoField(primary_key=True)
@@ -28,8 +29,23 @@ class Announcement(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)    
 
     def __str__(self):  
-        return self.title
-    
+        return f"{self.id},{self.title}"
+
+class Nofification(models.Model):
+    PRIORITY = (
+        ('high', 'High'),
+        ('medium', 'Medium'),
+        ('low', 'Low')
+    )
+    id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=255)
+    priority = models.CharField(max_length=15, choices=PRIORITY)
+    message = models.TextField()
+    created_by = models.ForeignKey('members.CoreMember', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    message_to = models.ForeignKey('Login.UserProfile', on_delete=models.CASCADE) #message_to
+    def __str__(self):  
+        return f"{self.id},{self.title}"
 
 class AssociationImage(models.Model):
     association = models.ForeignKey(Associations, on_delete=models.CASCADE, related_name='images')

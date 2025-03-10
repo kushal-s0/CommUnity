@@ -33,6 +33,7 @@ class CoreMember(models.Model):
 class Member(models.Model):
     id = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True)
     club = models.ForeignKey('committees.Associations', on_delete=models.CASCADE)
+    position = models.CharField(max_length=100, blank=True, null=True)
     joined_at = models.DateTimeField(auto_now_add=True)
     NOTIFICATION_CHOICES = (
         ('email', 'Email'),
@@ -42,7 +43,7 @@ class Member(models.Model):
 
 
     def __str__(self):
-        return self.id,self.id.full_name,self.club
+        return f"{self.id},{self.id.full_name},{self.club}" 
 
 # Preferences Model
 class Preference(models.Model):
@@ -57,4 +58,4 @@ class Preference(models.Model):
     notification_preference = models.CharField(max_length=10, choices=NOTIFICATION_CHOICES) 
 
     def __str__(self):  
-        return self.id,self.user.full_name,self.club
+        return f"{self.id},{self.user.full_name},{self.club}"
