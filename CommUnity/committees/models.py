@@ -44,6 +44,7 @@ class Nofification(models.Model):
     created_by = models.ForeignKey('members.CoreMember', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     message_to = models.ForeignKey('Login.UserProfile', on_delete=models.CASCADE) #message_to
+    email = models.EmailField(blank=True, null=True)
     def __str__(self):  
         return f"{self.id},{self.title}"
 
