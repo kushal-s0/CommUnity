@@ -1,5 +1,13 @@
-{% load static %}
-<link rel="stylesheet" href="{% static 'css/committee_detail.css' %}">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ committee.name }}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/committee_detail.css' %}">
+</head>
+<body>
 
 <h1>{{ committee.name }}</h1>
 <p>{{ committee.description }}</p>
@@ -7,16 +15,25 @@
 
 <h2>Images</h2>
 {% if committee.image %}
-    <h3>Main Image</h3>
     <img src="{{ committee.image.url }}" alt="Main Committee Image" style="max-width: 300px;">
 {% endif %}
 
 <h3>Additional Images</h3>
 {% for image in committee.images.all %}
-    <img src="{{ image.image.url }}" alt="committees Image" style="max-width: 300px;">
+    <img src="{{ image.image.url }}" alt="Committee Image" style="max-width: 300px;">
 {% empty %}
     <p>No additional images uploaded.</p>
 {% endfor %}
 
+{% if is_creator %}
+    <a href="{% url 'edit_club_committee' committee.id %}" class="btn btn-primary">Edit Committee</a>
+    <form action="{% url 'delete_club_committee' committee.id %}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure?');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete Committee</button>
+    </form>
+{% endif %}
 
-<a href="{% url url %}">Back to Committees List</a>
+<a href="{% url 'committees_list' %}" class="btn">Back to Committees List</a>
+
+</body>
+</html>

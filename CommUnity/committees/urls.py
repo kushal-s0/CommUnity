@@ -7,5 +7,7 @@ urlpatterns = [
     path('committees/', views.committees_list, name='committees_list'),
     path('club/<int:pk>/', views.club_detail, name='club_detail'),
     path('committee/<int:pk>/', views.committees_detail, name='committees_detail'),
+    path('club/<int:pk>/edit/', views.edit_club_committee, name='edit_club_committee'),
+    path('club/<int:pk>/delete/', views.delete_club_committee, name='delete_club_committee'),
 ]
 

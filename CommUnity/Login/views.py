@@ -22,14 +22,19 @@ def home_view(request):
         if role == 'faculty':
             return redirect('faculty')
 
-        #check if user is core member
-        if role == 'core_member':
-            return redirect('core_member')
+#         #check if user is core member
+#         if role == 'core_member':
+#             return redirect('core_member')
         
-        if role == 'member':
-            return redirect('member')
+#         if role == 'member':
+#             return redirect('member')
         
-        if role == 'non_participating':
+#         if role == 'non_participating':
+#             return render(request, 'account/home.html')
+        else:
             return render(request, 'account/home.html')
     else:
         return render(request, 'account/home.html')
+
+
+

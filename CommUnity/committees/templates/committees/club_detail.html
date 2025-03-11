@@ -15,7 +15,6 @@
 
 <h2>Images</h2>
 {% if club.image %}
-    <h3>Main Image</h3>
     <img src="{{ club.image.url }}" alt="Main Club Image" style="max-width: 300px;">
 {% endif %}
 
@@ -26,7 +25,15 @@
     <p>No additional images uploaded.</p>
 {% endfor %}
 
-<a href="{% url 'club_list' %}">Back to Clubs List</a>
+{% if is_creator %}
+    <a href="{% url 'edit_club_committee' club.id %}" class="btn btn-primary">Edit Club</a>
+    <form action="{% url 'delete_club_committee' club.id %}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure?');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete Club</button>
+    </form>
+{% endif %}
+
+<a href="{% url 'club_list' %}" class="btn">Back to Clubs List</a>
 
 </body>
 </html>

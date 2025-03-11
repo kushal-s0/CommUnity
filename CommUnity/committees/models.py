@@ -14,11 +14,12 @@ class Associations(models.Model):
     description = models.TextField()
     type = models.CharField(max_length=15, choices=ROLE_CHOICES)
     faculty_incharge = models.ForeignKey('faculty.Faculty', on_delete=models.CASCADE)
+    created_by = models.ForeignKey('members.CoreMember', on_delete=models.CASCADE, null=True, blank=True)  
     created_at = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(upload_to='association_images/', null=True, blank=True)
 
     def __str__(self):
-        return f"{self.name}"
+        return self.name
 # Announcements Model
 class Announcement(models.Model):
     id = models.AutoField(primary_key=True)

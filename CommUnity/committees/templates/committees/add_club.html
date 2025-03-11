@@ -26,7 +26,7 @@
         <label for="faculty_incharge">Select Faculty In-Charge:</label>
         <select name="faculty_incharge">
             <option value="">Select Faculty</option>
-            {% for faculty in faculty_members %}
+            {% for faculty in faculties %}
                 <option value="{{ faculty.id.ssv_id }}">{{ faculty.id.full_name }} ({{ faculty.id.ssv_id }})</option>
             {% endfor %}
         </select>        
