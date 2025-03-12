@@ -8,32 +8,36 @@
     <link rel="stylesheet" href="{% static 'css/club_details.css' %}">
 </head>
 <body>
+    <div class="club-container">
+        <h1>{{ club.name }}</h1>
+        <p>{{ club.description }}</p>
+        <p class="faculty-incharge">Faculty In-Charge: {{ club.faculty_incharge.id.full_name }}</p>
 
-<h1>{{ club.name }}</h1>
-<p>{{ club.description }}</p>
-<p>Faculty In-Charge: {{ club.faculty_incharge.id.full_name }}</p>
+        <h2>Images</h2>
+        {% if club.image %}
+            <img src="{{ club.image.url }}" alt="Main Club Image">
+        {% endif %}
 
-<h2>Images</h2>
-{% if club.image %}
-    <img src="{{ club.image.url }}" alt="Main Club Image" style="max-width: 300px;">
-{% endif %}
+        <h3>Additional Images</h3>
+        {% for image in club.images.all %}
+            <img src="{{ image.image.url }}" alt="Club Image">
+        {% empty %}
+            <p>No additional images uploaded.</p>
+        {% endfor %}
 
-<h3>Additional Images</h3>
-{% for image in club.images.all %}
-    <img src="{{ image.image.url }}" alt="Club Image" style="max-width: 300px;">
-{% empty %}
-    <p>No additional images uploaded.</p>
-{% endfor %}
+        {% if is_creator %}
+            <div class="button-container">
+                <a href="{% url 'edit_club_committee' club.id %}" class="btn btn-primary">Edit Club</a>
+                <form action="{% url 'delete_club_committee' club.id %}" method="post" onsubmit="return confirm('Are you sure?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Club</button>
+                </form>
+            </div>
+        {% endif %}
 
-{% if is_creator %}
-    <a href="{% url 'edit_club_committee' club.id %}" class="btn btn-primary">Edit Club</a>
-    <form action="{% url 'delete_club_committee' club.id %}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure?');">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Delete Club</button>
-    </form>
-{% endif %}
-
-<a href="{% url 'club_list' %}" class="btn">Back to Clubs List</a>
-
+        <div class="button-container">
+            <a href="{% url 'club_list' %}" class="btn btn-back">Back to Clubs List</a>
+        </div>
+    </div>
 </body>
 </html>
