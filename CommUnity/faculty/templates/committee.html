@@ -34,6 +34,7 @@
                                     <p class="card-text flex-grow-1">{{ committee.description|truncatechars:100 }}</p>
                                     <div class="mt-auto pt-2">
                                         <a href="{% url 'committees_detail' pk=committee.id%}" class="btn btn-sm btn-outline-primary">View Details</a>
+                                        <a href="{% url 'committee_member' pk=committee.id%}" class="btn btn-sm btn-outline-primary">View Members</a>
                                     </div>
                                 </div>
                             </div>

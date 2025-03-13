@@ -31,16 +31,14 @@ def club_detail(request, pk):
 # Committee detail view
 def committees_detail(request, pk):
     committee = get_object_or_404(Associations, pk=pk)
-
+    url = request.session.get('url')
+    print(type(url),url)
     is_creator = False
     if request.user.is_authenticated and request.user.userprofile.role == 'core_member':
         core_member = CoreMember.objects.get(id=request.user.userprofile)
         is_creator = committee.created_by == core_member
 
-    return render(request, 'committees/committee_detail.html', {
-        'committee': committee,
-        'is_creator': is_creator
-    })
+    return render(request, 'committees/committee_detail.html', context={'committee': committee, 'url': url, 'is_creator': is_creator})
 
 
 @login_required

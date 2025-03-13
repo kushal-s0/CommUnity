@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}
+<title>Committee Members</title>
+{% endblock title %}
+
+{% block content %}
+
+<h1>Committee Members</h1>
+
+{% for core_member in core_members %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">{{ core_member.id.full_name }}</h5>
+            <p class="card-text">Designation: {{ core_member.position }}</p>
+        </div>
+    </div>
+{% endfor %}
+
+{% for member in members %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">{{ member.id.full_name }}</h5>
+            <p class="card-text">Designation: {{ member.position }}</p>
+        </div>
+    </div>
+{% endfor %}
+
+{% endblock content %}

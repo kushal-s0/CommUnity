@@ -1,17 +1,20 @@
 {% extends "base.html" %}
 {% block title %}<title>Profile</title>{% endblock title %}
     {% block content %}
-    {{data}}
+    
     <div class="profile-container">
         <div class="profile-header">
-            <img src="https://via.placeholder.com/120" alt="User Profile Picture">
-            <h1>John Doe</h1>
-            <p>Web Developer</p>
+            <img src="{{user_profile.profile_picture}}" alt="User Profile Picture">
+            <h1>{{user_profile.full_name}}</h1>
+            <p>{{faculty.department}}</p>
         </div>
         <div class="profile-info">
-            <p><strong>Email:</strong> john.doe@example.com</p>
-            <p><strong>Location:</strong> New York, USA</p>
-            <p><strong>Bio:</strong> Passionate web developer with experience in full-stack development, always eager to learn new technologies.</p>
+            <p><strong>Email:</strong> {{user.email}}</p>
+            <p><strong>Designation:</strong> {{faculty.designation}}</p>
+            <p><strong>In-charge of:</strong></p>
+            {% for association in associations %}
+                <p> {{association.name}} ({{association.type}})</p>
+            {% endfor %}
         </div>
     </div>
     {% endblock content %}
