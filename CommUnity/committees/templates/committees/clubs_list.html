@@ -3,16 +3,22 @@
 
 <h1>Club List</h1>
 
-<ul>
-    {% for club in clubs %}
-        <li>
-            <a href="{% url 'club_detail' pk=club.id %}">
-                {{ club.name }}
-            </a> - {{ club.description }} (In-Charge: {{ club.faculty_incharge.id.full_name }})
-        </li>
-    {% empty %}
-        <li>No clubs have been added yet.</li>
-    {% endfor %}
-</ul>
+<div class="club-list">
+    <ul>
+        {% for club in clubs %}
+            <li>
+                <a href="{% url 'club_detail' pk=club.id %}" class="club-link">
+                    {{ club.name }}
+                </a> 
+                <p class="faculty-incharge">
+                    (In-Charge: {{ club.faculty_incharge.id.full_name }})
+                </p>
+                <p>{{ club.description }}</p>
+            </li>
+        {% empty %}
+            <li>No clubs have been added yet.</li>
+        {% endfor %}
+    </ul>
+</div>
 
-<a href="{% url 'home' %}">Back to Home</a>
+<a href="{% url 'home' %}" class="btn-back">Back to Home</a>

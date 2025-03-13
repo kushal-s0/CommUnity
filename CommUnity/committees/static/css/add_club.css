@@ -1,0 +1,166 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #FFFFFF;
+    color: #00171F;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header */
+header {
+    background: linear-gradient(135deg, #003459, #007EA7);
+    color: #FFFFFF;
+    padding: 15px 20px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.header-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Main Content */
+.main-content {
+    max-width: 600px;
+    margin: 30px auto;
+    background: #f9f9f9;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 23, 31, 0.2);
+    text-align: center;
+}
+
+/* Form Styling */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+label {
+    font-weight: bold;
+    text-align: left;
+    display: block;
+    color: #003459;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #007EA7;
+    border-radius: 6px;
+    font-size: 16px;
+    background: #FFFFFF;
+    color: #00171F;
+}
+
+/* Hide default file input */
+input[type="file"] {
+    display: none;
+}
+
+/* Custom File Upload Button */
+.custom-file-upload {
+    background: linear-gradient(135deg, #003459, #005F8A);
+    color: #FFFFFF;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 12px 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+    text-align: center;
+    width: 100%;
+    max-width: 250px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0px 4px 6px rgba(0, 23, 31, 0.2);
+}
+
+/* Hover Effect */
+.custom-file-upload:hover {
+    background: linear-gradient(135deg, #00171F, #003459);
+    transform: translateY(-2px);
+    box-shadow: 0px 6px 12px rgba(0, 23, 31, 0.3);
+}
+
+/* Center the file input button */
+.file-upload-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+textarea {
+    height: 80px;
+    resize: none;
+}
+
+/* Button Container */
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Buttons */
+.button {
+    display: inline-block;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 12px 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+    text-align: center;
+    width: 100%;
+    max-width: 250px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0px 4px 6px rgba(0, 52, 89, 0.2);
+}
+
+/* Create Button */
+.create-button {
+    background: linear-gradient(135deg, #003459, #005F8A);
+
+    color: #FFFFFF;
+}
+
+.create-button:hover {
+    background: linear-gradient(135deg, #00171F, #003459);
+    transform: translateY(-2px);
+    box-shadow: 0px 6px 12px rgba(0, 52, 89, 0.3);
+}
+
+/* Back to Home Button */
+.back-button {
+    background: linear-gradient(135deg, #003459, #005F8A);
+    color: #FFFFFF;
+    text-decoration: none; /* Removes the underline */
+    display: inline-block;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 12px 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+    text-align: center;
+    width: 100%;
+    max-width: 250px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0px 4px 6px rgba(0, 23, 31, 0.2);
+}
+
+.back-button:hover {
+    background: linear-gradient(135deg, #00171F, #003459);
+    transform: translateY(-2px);
+    box-shadow: 0px 6px 12px rgba(0, 23, 31, 0.3);
+}

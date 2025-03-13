@@ -8,20 +8,27 @@
     <link rel="stylesheet" href="{% static 'css/add_club.css' %}">
 </head>
 <body>
-    <h1>Add a New Club or Committee</h1>
+    <header>
+        <div class="header-container"> KJSIT CommUnity
+          <div class="logo"></div>
+        </div>
+      </header>
+
+    <main class="main-content">
+    <h2>Add a New Club or Committee</h2>
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <label for="name">Name:</label>
-        <input type="text" name="name" required><br>
+        <input type="text" name="name" required>
     
         <label for="description">Description:</label>
-        <textarea name="description" required></textarea><br>
+        <textarea name="description" required></textarea>
     
         <label for="type">Type:</label>
         <select name="type">
             <option value="clubs">Club</option>
             <option value="committees">Committee</option>
-        </select><br>
+        </select>
     
         <label for="faculty_incharge">Select Faculty In-Charge:</label>
         <select name="faculty_incharge">
@@ -30,16 +37,20 @@
                 <option value="{{ faculty.id.ssv_id }}">{{ faculty.id.full_name }} ({{ faculty.id.ssv_id }})</option>
             {% endfor %}
         </select>        
-
-        <label for="image">Main Image (optional):</label>
-        <input type="file" name="image"><br>
-        
-        <label for="images">Upload Additional Images:</label>
-        <input type="file" name="images" multiple><br>
     
-        <button type="submit">Create</button>
-    </form>
+        <div class="file-upload-container">
+            <label for="image" class="custom-file-upload">Choose Main Image</label>
+            <input type="file" id="image" name="image">
+        
+            <label for="images" class="custom-file-upload">Choose Additional Images</label>
+            <input type="file" id="images" name="images" multiple>
+        </div>
 
-    <a href="{% url 'home' %}">Back to Home</a>
+        <div class="button-container">
+            <button type="submit" class="button create-button">Create</button>
+            <a href="{% url 'home' %}" class="button back-button">Back to Home</a>
+        </div>        
+    </form>    
+    <br>
 </body>
 </html>

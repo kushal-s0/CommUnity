@@ -14,6 +14,8 @@ def home_view(request):
     #check if user is logged in
     if request.user.is_authenticated:
         user = request.user
+
+        
         #print (user)
         role = UserProfile.objects.get(id=user).role
         #print(role)

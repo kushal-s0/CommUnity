@@ -1,38 +1,199 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
+    <link rel="icon" type="image/jpeg" href="{% static 'images/logo.jpeg' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
 </head>
 <body>
-    <h1>Welcome to the Home Page!</h1>
 
-    <a href="{% url 'club_list' %}">View Clubs</a><br>
-    <a href="{% url 'committees_list' %}">View Committees</a>
+    <!-- Navigation Bar -->
+    <header>
+        <nav>
+            <div class="logo-container">
+                <img src="{% static 'images/logo.jpeg' %}" alt="CommUnity Logo" class="full-width-logo">
+                <div class="logo">KJSIT - <span>CommUnity</span></div>
+            </div>
+            
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="{% url 'committees_list' %}">Committees</a></li>
+                <li><a href="{% url 'club_list' %}">Clubs</a></li>
+                <li><a href="#notice-board">Notice Board</a></li>
+        
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'account_logout' %}" class="logout-btn">Logout</a></li>
+                    <li><span style="color: white; padding: 10px;">Welcome, {{ user.email }} <i class="fa-solid fa-circle-user"></i></span></li>
+                {% else %}
+                    <li><a href="{% url 'account_signup' %}" class="signup-btn">Sign Up</a></li>
+                    <li><a href="{% url 'account_login' %}" class="login-btn">Login</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        
+    </header>
 
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <h1>Campus Life <span>Connected</span></h1>
+        <p>Your one-stop platform for all college committees, clubs, events, and academic activities.Stay informed, get involved, and never miss an opportunity.</p>
+        <div class="buttons">
+            <a href="{% url 'committees_list' %}" class="btn blue">Explore Committees</a>
+            <a href="{% url 'club_list' %}" class="btn black">Discover Clubs</a>
+        </div>
+    </div>
+    <a href="https://kjsit.somaiya.edu.in/en" class="web-link" target="_blank">
+        <img src="{% static 'images/bodyimg.png' %}" class="body-image">
+    </a>
+</section>
+
+<!--Gallery-->
+<div class="gallery-section">
+<h2 class="gallery-heading">Featured Highlights</h2>
+<div class="gallery-container">
+    <button class="arrow prev" onclick="prevSlide()">&#10094;</button>
+    <div class="gallery" id="gallery">
+        <img src="https://via.placeholder.com/200">
+        <img src="https://via.placeholder.com/200" class="active">
+        <img src="https://via.placeholder.com/200">
+    </div>
+    <button class="arrow next" onclick="nextSlide()">&#10095;</button>
+</div>
+</div>
+
+<!-- -->
+<div class="committee-section">
+    <h2 class="committee-heading">Find Where You Belong To...🕵️</h2>
+    <p class="committee-subheading">Explore our diverse range of committees, clubs and their activities</p>
+    
+    <div class="committee-container">
+        <div class="committee-card tech">
+            <h3>Technical</h3>
+            <p>Organizing technical events, workshops, and fostering innovation across campus.</p>
+            <ul>
+            </ul>
+        </div>
+
+        <div class="committee-card cultural">
+            <h3>Cultural</h3>
+            <p>Promoting arts, culture, and organizing festive celebrations on campus.</p>
+            <ul>
+            </ul>
+        </div>
+
+        <div class="committee-card sports">
+            <h3>Sports</h3>
+            <p>Organizing sports events and promoting physical fitness among students.</p>
+            <ul>
+            </ul>
+        </div>
+
+        <div class="committee-card social">
+            <h3>Social</h3>
+            <p>Fostering community engagement through social events and outreach programs.</p>
+            <ul>
+            </ul>
+        </div>
+
+        <div class="committee-card others">
+            <h3>Others</h3>
+            <p>Supporting diverse interests and activities beyond specific committees.</p>
+            <ul>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!--Notice Board-->
+<div class="notice-board" id="notice-board">
+    <div class="notice-header">
+    <h2>Notice Board</h2>
+    <div class="nav-buttons">
+        <button id="prevNotice">&#x25C0;</button>
+        <button id="nextNotice">&#x25B6;</button>
+    </div>
+    </div>
+    <div class="notices">
+        <!-- Notices will be dynamically added here -->
+    </div>
+</div>
+
+    <!-- Authentication Section -->
     {% if user.is_authenticated %}
-        <p>Hello, {{ user.email }}!</p>
-        <a href="{% url 'account_logout' %}">Logout</a>
-        
-        <!-- Button visible only for core members -->
-        <button id="add-club-btn" style="display: none;" onclick="window.location.href='{% url 'add_club_committee' %}'">
-            Add Club/Committee
-        </button>
-        
+        <div class="user-info">
+            <p>Hello, {{ user.email }}!<i class="fa-solid fa-circle-user"></i></p>
+
+            <!-- Button for Core Members -->
+            <button id="add-club-btn" style="display: none;" onclick="window.location.href='{% url 'add_club_committee' %}'">
+                Add Club/Committee
+            </button>
+        </div>
 
         <script>
-            // Simulate checking the user's role (ideally from a hidden field or API)
-            const userRole = "{{ user.userprofile.role }}";  // Assuming role is stored in userprofile
+            // Check user role from template variable
+            const userRole = "{{ user.userprofile.role }}";  
             
             if (userRole === 'core_member') {
                 document.getElementById('add-club-btn').style.display = 'block';
             }
         </script>
-
-    {% else %}
-        <a href="{% url 'account_signup' %}">Sign Up</a> |
-        <a href="{% url 'account_login' %}">Login</a>
     {% endif %}
+
+    <!-- Footer (Optional) -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>CommUnity</h3>
+                <p>Your central platform for college activities, committees, and clubs.</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-telegram"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="{% url 'committees_list' %}">Committees</a></li>
+                    <li><a href="{% url 'club_list' %}">Clubs</a></li>
+                    <li><a href="#notice-board">Notice Board</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Support</h3>
+                <ul>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Contact Admin</a></li>
+                    <li><a href="#">FAQs</a></li>
+                    <li><a href="#">Guidelines</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <ul class="contact-info">
+                    <li><i class="fas fa-map-marker-alt"></i> Somaiya Ayurvihar Complex, Eastern Express Highway, Near Everard Nagar, Sion (East), Mumbai – 400 022</li>
+                    <li><i class="fas fa-envelope"></i> support@college.edu</li>
+                    <li><i class="fas fa-phone"></i> (123) 456-7890</li>
+                </ul>
+            </div>
+        </div>
+        <hr>
+        <div class="footer-bottom">
+            <p>© 2025 CommUnity. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Cookie Policy</a>
+            </div>
+        </div>
+    </footer>    
+
+    <script src="{% static 'js/home.js' %}"></script>
 </body>
 </html>
