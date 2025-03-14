@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .student-list {
+            list-style: none;
+            padding: 0;
+        }
+        .student-list li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .student-list li:last-child {
+            border-bottom: none;
+        }
+        .student-btn {
+            width: 100%;
+            padding: 8px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 16px;
+        }
+        .student-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Search Students</h2>
+        <input type="text" id="search" placeholder="Search by name or email" onkeyup="filterStudents()">
+        <ul class="student-list" id="studentList"></ul>
+    </div>
+
+    <script>
+        function filterStudents() {
+            let input = document.getElementById("search").value.toLowerCase();
+
+            fetch('/faculty/add_core_member', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({ query: input })
+            })
+            .then(response => response.json())
+            .then(data => {
+                let studentList = document.getElementById("studentList");
+                studentList.innerHTML = '';  // Clear the list
+
+                data.students.forEach(student => {
+                    let li = document.createElement("li");
+                    
+                    let button = document.createElement("button");
+                    button.className = "student-btn";
+                    button.textContent = `${student.id} : ${student.name} - ${student.email}`;
+                    button.onclick = function() {
+                        sendStudentIdToBackend(student.id);
+                    };
+
+                    li.appendChild(button);
+                    studentList.appendChild(li);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function sendStudentIdToBackend(studentId) {
+            fetch('/faculty/select_student', {  // Change this to your Django view URL
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({ student_id: studentId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);  // Show response from backend
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function getCSRFToken() {
+            return document.cookie.split('; ')
+                .find(row => row.startsWith('csrftoken'))
+                ?.split('=')[1];
+        }
+    </script>
+</body>
+</html>

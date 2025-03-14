@@ -2,21 +2,63 @@
 {% block title %}<title>Profile</title>{% endblock title %}
     {% block content %}
     
+    <style>
+        .profile-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .profile-header img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .profile-header h1 {
+            margin: 10px 0 5px;
+            font-size: 24px;
+        }
+        .profile-info {
+            text-align: left;
+            margin-top: 15px;
+        }
+        .edit-button {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .edit-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    
     <div class="profile-container">
         <div class="profile-header">
-            <img src="{{user_profile.profile_picture}}" alt="User Profile Picture">
-            <h1>{{user_profile.full_name}}</h1>
-            <p>{{faculty.department}}</p>
+            <img src="{{ user_profile.profile_picture }}" alt="User Profile Picture">
+            <h1>{{ user_profile.full_name }}</h1>
+            <p>{{ faculty.department }}</p>
         </div>
         <div class="profile-info">
-            <p><strong>Email:</strong> {{user.email}}</p>
-            <p><strong>Designation:</strong> {{faculty.designation}}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Designation:</strong> {{ faculty.designation }}</p>
             <p><strong>In-charge of:</strong></p>
             {% for association in associations %}
-                <p> {{association.name}} ({{association.type}})</p>
+                <p>{{ association.name }} ({{ association.type }})</p>
             {% endfor %}
         </div>
+        
+        <a href="{% url 'edit_profile'%}" class="edit-button">Edit Profile</a>
     </div>
+    
     {% endblock content %}
-
-
