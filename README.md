@@ -5,9 +5,13 @@ After pulling the project run this command in terminal of the vscode project
 new committees and club list add kardiya hai and club add karne ke liye core member hona chaiye 
 faculty email verification hold pe rakha hai badme karege
 <br>
-#tasks
+# tasks
 <br>
-Sagar - faculty 
+Sagar - faculty profile, non-participating to core members by faculty
+<br>
 Aditya - homepage frontend
+<br>
 Pragati - homepage backend 
+<br>
 Kushal - committees backend 
+<br>
