@@ -55,7 +55,7 @@ class Preference(models.Model):
         ('phone', 'Phone'),
         ('none', 'None')
     )
-    notification_preference = models.CharField(max_length=10, choices=NOTIFICATION_CHOICES) 
+    notification_preference = models.CharField(max_length=10, choices=NOTIFICATION_CHOICES,default='email') 
 
     def __str__(self):  
         return f"{self.id},{self.user.full_name},{self.club}"

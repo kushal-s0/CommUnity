@@ -1,17 +1,59 @@
 from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.contrib.auth.decorators import login_required
 from .models import Associations, Faculty, AssociationImage, CoreMember
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
 
+from django.contrib.auth.models import User
+from Login.models import UserProfile
+from members.models import CoreMember, Member, Preference
 # List all clubs
 def club_list(request):
     clubs = Associations.objects.filter(type='clubs')  # Only clubs
     return render(request, 'committees/clubs_list.html', {'clubs': clubs})
 
 
-def committees_list(request):
+def committees_list(request): 
+    if request.method == 'POST':
+        if not request.user.is_authenticated:  
+            print("User not logged in")
+            return JsonResponse({'error': 'User not authenticated'}, status=401)  # Return JSON, not HTML
+
+        try:
+            data = json.loads(request.body)
+            committees = data.get('committees', [])
+
+            for committee in committees:
+                committee_id = committee  # JavaScript sends an array of IDs
+                if not committee_id:
+                    continue
+
+                association = Associations.objects.get(id=committee_id)
+                print(f"Association: {association}")
+                user = request.user
+                user_profile = UserProfile.objects.get(id=user)  # Fix: Retrieve UserProfile using user
+                print(f"User Profile: {user_profile}")
+                # Save preference of user
+                preference = Preference(user=user_profile, club=association)
+                preference.save()
+
+
+            print("Received Committees:", committees)
+            return JsonResponse({'message': 'Preferences saved successfully'})
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Associations.DoesNotExist:
+            return JsonResponse({'error': 'Invalid committee ID'}, status=404)
+        except UserProfile.DoesNotExist:
+            return JsonResponse({'error': 'User profile not found'}, status=404)
+
+    # Handle GET request
     committees = Associations.objects.filter(type='committees')
     request.session['url'] = 'committees_list'
     return render(request, 'committees/committees_list.html', {'committees': committees})
+
 
 # Club detail view
 def club_detail(request, pk):

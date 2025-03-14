@@ -7,9 +7,10 @@
     <ul>
         {% for committee in committees %}
             <li>
+                <span class="star-icon" onclick="toggleSelection({{ committee.id }})">&#9734;</span>
                 <a href="{% url 'committees_detail' pk=committee.id %}" class="committee-link">
                     {{ committee.name }}
-                </a> - {{ committee.description }} 
+                </a> - {{ committee.description }}
                 <br>
                 <span class="faculty-incharge">(In-Charge: {{ committee.faculty_incharge.id.full_name }})</span>
             </li>
@@ -20,3 +21,62 @@
 </div>
 
 <a href="{% url 'home' %}" class="btn-back">Back to Home</a>
+
+<script>
+    let selectedCommittees = [];
+
+    function toggleSelection(committeeId) {
+        
+        const index = selectedCommittees.indexOf(committeeId);
+        if (index > -1) {
+            selectedCommittees.splice(index, 1);
+        } else {
+            selectedCommittees.push(committeeId);
+        }
+        updateStars();
+        sendSelectedCommittees(); // Send data automatically on selection change
+    }
+
+    function updateStars() {
+        document.querySelectorAll('.star-icon').forEach(star => {
+            const committeeId = parseInt(star.nextElementSibling.href.split('/').slice(-2, -1)[0]);
+            if (selectedCommittees.includes(committeeId)) {
+                star.innerHTML = '&#9733;'; // Filled star
+                star.style.color = '#FFD700';
+            } else {
+                star.innerHTML = '&#9734;'; // Empty star
+                star.style.color = '#000';
+            }
+        });
+    }
+
+    function sendSelectedCommittees() {
+        fetch(window.location.pathname, { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: JSON.stringify({ committees: selectedCommittees })
+        })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 401) { // If user is not logged in
+                    alert("You need to log in to save preferences.");
+                    window.location.href = "/accounts/login"; // Redirect to login page
+                    return;
+                }
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => console.log('Response:', data))
+        .catch(error => console.error('Error:', error));
+    }
+    
+    
+
+    function getCSRFToken() {
+        return document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
+    }
+</script>
