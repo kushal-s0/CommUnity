@@ -28,3 +28,22 @@ document.addEventListener("DOMContentLoaded", function() {
 // Attach event listeners to buttons
 document.querySelector(".prev").addEventListener("click", prevSlide);
 document.querySelector(".next").addEventListener("click", nextSlide);
+
+document.addEventListener("DOMContentLoaded", function () {
+    const userIcon = document.querySelector(".user-icon");
+    const sidebar = document.querySelector(".dropdown-menu");
+    const body = document.body;
+
+    userIcon.addEventListener("click", function (event) {
+        event.stopPropagation(); // Prevents closing when clicking the icon
+        sidebar.classList.toggle("show"); // Show/hide sidebar
+        body.classList.toggle("sidebar-active"); // Add blur effect
+    });
+
+    document.addEventListener("click", function (event) {
+        if (!sidebar.contains(event.target) && !userIcon.contains(event.target)) {
+            sidebar.classList.remove("show");
+            body.classList.remove("sidebar-active");
+        }
+    });
+});

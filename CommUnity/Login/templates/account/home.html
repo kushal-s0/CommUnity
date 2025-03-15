@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
-    <link rel="icon" type="image/jpeg" href="{% static 'images/logo.jpeg' %}">
+    <link rel="icon" type="image/jpeg" href="{% static 'images/logo.jpeg' %}" class="favicon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
 </head>
@@ -28,7 +28,28 @@
         
                 {% if user.is_authenticated %}
                     <li><a href="{% url 'account_logout' %}" class="logout-btn">Logout</a></li>
-                    <li><span style="color: white; padding: 10px;">Welcome, {{ user.email }} <i class="fa-solid fa-circle-user"></i></span></li>
+                    <li><span style="color: white; padding: 10px;">Welcome, {{ user.email }}</span> 
+                        <div class="user-dropdown">
+                            <i class="fa-solid fa-circle-user user-icon"></i>
+                            <div class="dropdown-menu">
+                                <a href="#">Profile</a>
+                                <a href="{% url 'add_club_committee' %}" id="add-club-link" style="display: none;" >Add Club/Committee</a>
+                                <a href="#">Settings</a>
+                                <a href="{% url 'account_logout' %}">Logout</a>
+                            </div>
+                        </div>
+                    </li>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function () {
+                            // Check user role
+                            const userRole = "{{ user.userprofile.role }}";  
+                            const addClubLink = document.getElementById("add-club-link");
+                
+                            if (userRole === "core_member") {
+                                addClubLink.style.display = "block"; // Show the link for core members
+                            }
+                        });
+                    </script>
                 {% else %}
                     <li><a href="{% url 'account_signup' %}" class="signup-btn">Sign Up</a></li>
                     <li><a href="{% url 'account_login' %}" class="login-btn">Login</a></li>
@@ -124,27 +145,6 @@
     </div>
 </div>
 
-    <!-- Authentication Section -->
-    {% if user.is_authenticated %}
-        <div class="user-info">
-            <p>Hello, {{ user.email }}!<i class="fa-solid fa-circle-user"></i></p>
-
-            <!-- Button for Core Members -->
-            <button id="add-club-btn" style="display: none;" onclick="window.location.href='{% url 'add_club_committee' %}'">
-                Add Club/Committee
-            </button>
-        </div>
-
-        <script>
-            // Check user role from template variable
-            const userRole = "{{ user.userprofile.role }}";  
-            
-            if (userRole === 'core_member') {
-                document.getElementById('add-club-btn').style.display = 'block';
-            }
-        </script>
-    {% endif %}
-
     <!-- Footer (Optional) -->
     <footer>
         <div class="footer-container">
@@ -179,7 +179,7 @@
                 <ul class="contact-info">
                     <li><i class="fas fa-map-marker-alt"></i> Somaiya Ayurvihar Complex, Eastern Express Highway, Near Everard Nagar, Sion (East), Mumbai – 400 022</li>
                     <li><i class="fas fa-envelope"></i> support@college.edu</li>
-                    <li><i class="fas fa-phone"></i> (123) 456-7890</li>
+                    <li><i class="fas fa-phone"></i> 91-22-44444408 / 44444403</li>
                 </ul>
             </div>
         </div>
@@ -187,9 +187,9 @@
         <div class="footer-bottom">
             <p>© 2025 CommUnity. All rights reserved.</p>
             <div class="footer-links">
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Service</a>
-                <a href="#">Cookie Policy</a>
+                <a href="https://www.somaiya.edu.in/en/privacy-policy" target="blank">Privacy Policy</a>
+                <a href="https://www.somaiya.edu.in/en/terms-and-conditions" target="balnk">Terms &amp; Conditions</a>
+                <a href="https://www.somaiya.edu.in/en/disclaimer" target="blank">Disclaimer</a>
             </div>
         </div>
     </footer>    

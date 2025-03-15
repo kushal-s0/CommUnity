@@ -9,6 +9,14 @@ html {
     display: none;
 }
 
+.favicon {
+    width: 32px; /* Adjust size */
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+
 body {
     overflow: auto;
     -ms-overflow-style: none;  /* Hide scrollbar for IE and Edge */
@@ -96,6 +104,73 @@ ul li span{
     background: #007bb5;
     color: white;
 }
+
+.user-dropdown {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.user-icon {
+    margin-right: 15px;
+    font-size: 18px;
+}
+
+.dropdown-menu {
+    display: none;
+    color: black;
+    top: 80px;
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: fixed;
+    right: -300px; /* Initially hidden off-screen */
+    width: 250px; /* Fixed width */
+    height: 100vh; /* Full height */
+    background: rgba(255, 255, 255); /* Slightly transparent */
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+    padding-top: 0px;
+    transition: right 0.3s ease-in-out;
+    z-index: 1001;
+}
+
+.dropdown-menu a {
+    border-bottom: 1px solid #ccc;
+    display: block;
+    padding: 15px;
+    text-decoration: none;
+    color: black;
+    width: 100%;
+    text-align: left;
+}
+
+/* .dropdown-menu a:last-child {
+    border-bottom: none;
+} */
+
+body.sidebar-active::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Dark semi-transparent overlay */
+    z-index: 1000;
+}
+
+.dropdown-menu.show {
+    display: block; /* Ensure it becomes visible */
+    right: 0;
+}
+
+.dropdown-menu a:hover {
+    background: #f0f0f0;
+}
+
+
+
 /* Hero Section */
 .hero {
     display: flex;
