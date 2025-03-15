@@ -1,9 +1,11 @@
-from django.shortcuts import render,get_object_or_404
+from django.shortcuts import render,get_object_or_404,redirect
 from faculty.models import Faculty
 from committees.models import Associations
 from Login.models import UserProfile
 from committees.models import Associations
 from members.models import CoreMember, Member
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -127,3 +129,38 @@ def select_student(request):
             return JsonResponse({'message': str(e)}, status=500)
 
     return render(request, 'add_core_member.html')
+
+@login_required
+def approve_clubs(request):
+    if not request.user.is_authenticated:
+        return HttpResponse("You must be logged in")
+
+    try:
+        faculty_user = get_object_or_404(UserProfile, id=request.user) 
+        print("Faculty User:", faculty_user) 
+
+        if faculty_user.role != 'faculty':  
+            return HttpResponse("Only faculty members can approve clubs.")
+
+        if request.method == "POST":
+            club_id = request.POST.get("club_id")
+            action = request.POST.get("action")  
+
+            club = get_object_or_404(Associations, id=club_id)
+
+            if action == "approve":
+                club.status = "approved"
+            elif action == "reject":
+                club.status = "rejected"
+            else:
+                return HttpResponse("Invalid action")
+
+            club.save()
+            return redirect("approve_clubs")  
+
+        pending_clubs = Associations.objects.filter(status='pending')
+
+        return render(request, "approve_clubs.html", {"pending_clubs": pending_clubs})
+
+    except UserProfile.DoesNotExist:
+        return HttpResponse("User profile not found")

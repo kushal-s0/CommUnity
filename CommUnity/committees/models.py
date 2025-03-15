@@ -9,6 +9,11 @@ class Associations(models.Model):
         ('committees', 'Committees'),
         ('clubs', 'Clubs')
     )
+    STATUS_CHOICES = (
+        ('pending', 'Pending Approval'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    )
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     description = models.TextField()
@@ -17,9 +22,10 @@ class Associations(models.Model):
     created_by = models.ForeignKey('members.CoreMember', on_delete=models.CASCADE, null=True, blank=True)  
     created_at = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(upload_to='association_images/', null=True, blank=True)
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending')
 
     def __str__(self):
-        return self.name
+        return f"{self.name}-{self.status}"
 # Announcements Model
 class Announcement(models.Model):
     id = models.AutoField(primary_key=True)

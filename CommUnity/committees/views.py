@@ -4,13 +4,15 @@ from .models import Associations, Faculty, AssociationImage, CoreMember
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.core.mail import send_mail
+from django.conf import settings
 
 from django.contrib.auth.models import User
 from Login.models import UserProfile
 from members.models import CoreMember, Member, Preference
 # List all clubs
 def club_list(request):
-    clubs = Associations.objects.filter(type='clubs')  # Only clubs
+    clubs = Associations.objects.filter(type='clubs',status='approved')  # Only clubs
     return render(request, 'committees/clubs_list.html', {'clubs': clubs})
 
 
@@ -50,7 +52,7 @@ def committees_list(request):
             return JsonResponse({'error': 'User profile not found'}, status=404)
 
     # Handle GET request
-    committees = Associations.objects.filter(type='committees')
+    committees = Associations.objects.filter(type='committees',status='approved')  
     request.session['url'] = 'committees_list'
     return render(request, 'committees/committees_list.html', {'committees': committees})
 
@@ -115,7 +117,8 @@ def add_club_committee(request):
             description=description,
             type=association_type,
             faculty_incharge=faculty_incharge,
-            created_by=core_member
+            created_by=core_member,
+            status='pending'
         )
 
         if image:
@@ -127,6 +130,15 @@ def add_club_committee(request):
         for image in images:
             AssociationImage.objects.create(association=club, image=image)
 
+        send_mail(
+            subject=f"Approval Required for {name}",
+            message=f"Dear {faculty_incharge.id.full_name},\n\n"
+                    f"A new {association_type} named '{name}' has been created by {core_member.id.full_name}. "
+                    f"Please review the details of {name} and approve it if everything is in order.\n\n",
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[faculty_incharge.id.id.email],
+            fail_silently=False,
+        )
         return redirect('home')
 
     return render(request, 'committees/add_club.html', {'faculties': faculties})

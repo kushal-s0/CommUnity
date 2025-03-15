@@ -1,0 +1,28 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approve Clubs/Committees</title>
+</head>
+<body>
+    <h2>Pending Clubs/Committees</h2>
+
+    {% for club in pending_clubs %}
+        <div>
+            <h3>{{ club.name }}</h3>
+            <p>{{ club.description }}</p>
+            <p>Created by: {{ club.created_by.id.full_name }}</p>
+            <form method="POST" action="{% url 'approve_clubs' %}">
+                {% csrf_token %}
+                <input type="hidden" name="club_id" value="{{ club.id }}">
+                <button type="submit" name="action" value="approve">Approve</button>
+                <button type="submit" name="action" value="reject">Reject</button>
+            </form>            
+        </div>
+    {% empty %}
+        <p>No pending clubs/committees.</p>
+    {% endfor %}
+</body>
+</html>
