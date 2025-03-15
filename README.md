@@ -9,7 +9,7 @@ faculty email verification hold pe rakha hai badme karege
 <br>
 Sagar - faculty profile, non-participating to core members by faculty --done
 <br>
-Aditya - homepage frontend
+Aditya - improving the CSS of committees and clubs 
 <br>
 Pragati - homepage backend 
 <br>
