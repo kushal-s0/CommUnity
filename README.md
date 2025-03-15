@@ -7,7 +7,7 @@ faculty email verification hold pe rakha hai badme karege
 <br>
 # tasks
 <br>
-Sagar - faculty profile, non-participating to core members by faculty
+Sagar - faculty profile, non-participating to core members by faculty --done
 <br>
 Aditya - homepage frontend
 <br>
