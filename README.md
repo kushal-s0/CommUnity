@@ -13,5 +13,5 @@ Aditya - improving the CSS of committees and clubs
 <br>
 Pragati - homepage backend 
 <br>
-Kushal - committees backend 
+Kushal - committees backend --login unique && approve for the clubs and committees
 <br>
