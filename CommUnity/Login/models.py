@@ -1,6 +1,10 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.models import AbstractUser
+
+class CustomUser(AbstractUser):  
+    email = models.EmailField(unique=True)
 
 # User Model (Extension)
 class UserProfile(models.Model):

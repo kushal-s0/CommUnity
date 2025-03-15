@@ -11,16 +11,19 @@ import json
 
 from django.db.models import Q
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
 # Create your views here.
 
 def faculty_view(request):
     return render(request, 'faculty.html')
 def profile_view(request):   
     active_user = request.user
-    user = User.objects.get(username=active_user)
+    user = get_object_or_404(User, username=active_user.username)
     print(user.email)
-    user_profile = UserProfile.objects.get(id=active_user)
+    user_profile = get_object_or_404(UserProfile, id=user)
     faculty = Faculty.objects.get(id=user_profile)
     associations = Associations.objects.filter(faculty_incharge=faculty)
     print(associations)
@@ -39,7 +42,7 @@ def committee_member_view( request,pk):
 def faculty_committee(request):
     try:
         user = request.user
-        user_profile = UserProfile.objects.get(id=user)
+        user_profile = get_object_or_404(UserProfile, id=user)
         faculty = Faculty.objects.get(id=user_profile)
         
         
@@ -78,10 +81,10 @@ def add_core_member_view(request):
 
         if query:
             # Filter users based on username OR email
-            users = User.objects.filter(Q(username__icontains=query) | Q(email__icontains=query))
+            users = get_user_model().objects.filter(Q(username__icontains=query) | Q(email__icontains=query))
 
             # Get matching UserProfile records for these users
-            students = UserProfile.objects.filter(id__in=users)
+            students = UserProfile.objects.filter(id__in=users.values_list('id', flat=True))
 
             # Serialize data
             student_list = [{'id': student.id.username, 'name': student.full_name, 'email': student.id.email} for student in students]
@@ -100,8 +103,8 @@ def select_student(request):
                 return JsonResponse({'message': 'Student ID not provided'}, status=400)
 
             # Fetch the student from the database (modify based on your model structure)
-            student = User.objects.get(username=student_id)  # Assuming username is the student ID
-            student_user = UserProfile.objects.get(id=student)
+            student = get_object_or_404(User, username=student_id)  # Assuming username is the student ID
+            student_user = get_object_or_404(UserProfile, id=student)
             print(student_user)
             student_user.role = 'Core Member'
             student_user.save()
