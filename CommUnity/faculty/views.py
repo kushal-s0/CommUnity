@@ -130,37 +130,57 @@ def select_student(request):
 
     return render(request, 'add_core_member.html')
 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from Login.models import UserProfile
+from faculty.models import Faculty
+from committees.models import Associations
+
 @login_required
 def approve_clubs(request):
     if not request.user.is_authenticated:
         return HttpResponse("You must be logged in")
 
     try:
-        faculty_user = get_object_or_404(UserProfile, id=request.user) 
-        print("Faculty User:", faculty_user) 
+        faculty_user = get_object_or_404(UserProfile, id=request.user)
+        faculty = get_object_or_404(Faculty, id=faculty_user)  
 
-        if faculty_user.role != 'faculty':  
-            return HttpResponse("Only faculty members can approve clubs.")
+        # Fetch pending requests
+        pending_clubs = Associations.objects.filter(status='pending', faculty_incharge=faculty)
+        delete_requests = Associations.objects.filter(status='delete_pending', faculty_incharge=faculty)
 
         if request.method == "POST":
             club_id = request.POST.get("club_id")
-            action = request.POST.get("action")  
-
+            action = request.POST.get("action")
             club = get_object_or_404(Associations, id=club_id)
 
+            # Ensure only assigned faculty can approve/reject
+            if club.faculty_incharge != faculty:
+                return HttpResponse("You are not authorized to approve/reject this request.")
+
             if action == "approve":
-                club.status = "approved"
+                club.status = "approved"  # Approve the club
+
             elif action == "reject":
+                if club.status == "delete_pending":
+                    club.status = "approved"  # If delete is rejected, restore approval
                 club.status = "rejected"
-            else:
-                return HttpResponse("Invalid action")
+            elif action == "approve_delete":
+                club.delete()  # Faculty finally approves deletion
+                return redirect("approve_clubs")
 
             club.save()
-            return redirect("approve_clubs")  
+            return redirect("approve_clubs")
 
-        pending_clubs = Associations.objects.filter(status='pending')
-
-        return render(request, "approve_clubs.html", {"pending_clubs": pending_clubs})
+        return render(request, "approve_clubs.html", {
+            "pending_clubs": pending_clubs,
+            "delete_requests": delete_requests,
+            "faculty": faculty
+        })
 
     except UserProfile.DoesNotExist:
         return HttpResponse("User profile not found")
+    except Faculty.DoesNotExist:
+        return HttpResponse("Faculty profile not found")
+

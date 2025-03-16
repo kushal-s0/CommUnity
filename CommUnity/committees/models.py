@@ -13,6 +13,7 @@ class Associations(models.Model):
         ('pending', 'Pending Approval'),
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
+        ('delete_pending', 'Delete Request Pending'),
     )
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
@@ -23,9 +24,10 @@ class Associations(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(upload_to='association_images/', null=True, blank=True)
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending')
+    # edit_request_data = models.JSONField(null=True, blank=True) 
 
     def __str__(self):
-        return f"{self.name}-{self.status}"
+        return f"{self.name} - {self.status}"
 # Announcements Model
 class Announcement(models.Model):
     id = models.AutoField(primary_key=True)

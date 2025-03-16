@@ -6,14 +6,16 @@
 <div class="committees-list">
     <ul>
         {% for committee in committees %}
-            <li>
-                <span class="star-icon" onclick="toggleSelection({{ committee.id }})">&#9734;</span>
-                <a href="{% url 'committees_detail' pk=committee.id %}" class="committee-link">
-                    {{ committee.name }}
-                </a> - {{ committee.description }}
-                <br>
-                <span class="faculty-incharge">(In-Charge: {{ committee.faculty_incharge.id.full_name }})</span>
-            </li>
+            {% if committee.status == "approved" or committee.status == "delete_pending" %}
+                <li>
+                    <span class="star-icon" onclick="toggleSelection({{ committee.id }})">&#9734;</span>
+                    <a href="{% url 'committees_detail' pk=committee.id %}" class="committee-link">
+                        {{ committee.name }}
+                    </a> - {{ committee.description }}
+                    <br>
+                    <span class="faculty-incharge">(In-Charge: {{ committee.faculty_incharge.id.full_name }})</span>
+                </li>
+            {% endif %}
         {% empty %}
             <li>No committees have been added yet.</li>
         {% endfor %}

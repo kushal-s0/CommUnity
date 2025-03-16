@@ -6,15 +6,17 @@
 <div class="club-list">
     <ul>
         {% for club in clubs %}
-            <li>
-                <a href="{% url 'club_detail' pk=club.id %}" class="club-link">
-                    {{ club.name }}
-                </a> 
-                <p class="faculty-incharge">
-                    (In-Charge: {{ club.faculty_incharge.id.full_name }})
-                </p>
-                <p>{{ club.description }}</p>
-            </li>
+            {% if club.status == "approved" or club.status == "delete_pending" %}
+                <li>
+                    <a href="{% url 'club_detail' pk=club.id %}" class="club-link">
+                        {{ club.name }}
+                    </a> 
+                    <p class="faculty-incharge">
+                        (In-Charge: {{ club.faculty_incharge.id.full_name }})
+                    </p>
+                    <p>{{ club.description }}</p>
+                </li>
+            {% endif %}
         {% empty %}
             <li>No clubs have been added yet.</li>
         {% endfor %}

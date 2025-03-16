@@ -46,16 +46,3 @@ class Member(models.Model):
         return f"{self.id},{self.id.full_name},{self.club}" 
 
 # Preferences Model
-class Preference(models.Model):
-    id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    club = models.ForeignKey('committees.Associations', on_delete=models.CASCADE)
-    NOTIFICATION_CHOICES = (
-        ('email', 'Email'),
-        ('phone', 'Phone'),
-        ('none', 'None')
-    )
-    notification_preference = models.CharField(max_length=10, choices=NOTIFICATION_CHOICES,default='email') 
-
-    def __str__(self):  
-        return f"{self.id},{self.user.full_name},{self.club}"

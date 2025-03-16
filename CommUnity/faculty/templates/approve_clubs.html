@@ -14,15 +14,36 @@
             <h3>{{ club.name }}</h3>
             <p>{{ club.description }}</p>
             <p>Created by: {{ club.created_by.id.full_name }}</p>
-            <form method="POST" action="{% url 'approve_clubs' %}">
-                {% csrf_token %}
-                <input type="hidden" name="club_id" value="{{ club.id }}">
-                <button type="submit" name="action" value="approve">Approve</button>
-                <button type="submit" name="action" value="reject">Reject</button>
-            </form>            
+            {% if club.faculty_incharge.id == faculty.id %}
+                <form method="POST" action="{% url 'approve_clubs' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="club_id" value="{{ club.id }}">
+                    <button type="submit" name="action" value="approve">Approve</button>
+                    <button type="submit" name="action" value="reject">Reject</button>
+                </form>  
+            {% else %}    
+            <p><strong>Approval pending from {{ club.faculty_incharge.name |default:"Unknown Faculty"}}.</strong></p>
+            {% endif %}     
         </div>
     {% empty %}
         <p>No pending clubs/committees.</p>
+    {% endfor %}
+    
+
+    <h2>Delete Requests</h2>
+    {% for club in delete_requests %}
+        <div class="club-card">
+            <h3>Delete Request: {{ club.name }}</h3>
+            <p>{{ club.description }}</p>
+            <form method="POST" action="{% url 'approve_clubs' %}">
+                {% csrf_token %}
+                <input type="hidden" name="club_id" value="{{ club.id }}">
+                <button type="submit" name="action" value="approve_delete" class="btn reject">Approve Delete</button>
+                <button type="submit" name="action" value="reject" class="btn reject">Reject</button>
+            </form>
+        </div>
+    {% empty %}
+        <p>No delete requests.</p>
     {% endfor %}
 </body>
 </html>

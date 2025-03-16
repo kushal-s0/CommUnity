@@ -9,52 +9,55 @@ from django.conf import settings
 
 from django.contrib.auth.models import User
 from Login.models import UserProfile
-from members.models import CoreMember, Member, Preference
+from members.models import CoreMember, Member
 # List all clubs
 def club_list(request):
-    clubs = Associations.objects.filter(type='clubs',status='approved')  # Only clubs
+    clubs = Associations.objects.filter(type='clubs',status__in=["approved", "delete_pending"]) 
     return render(request, 'committees/clubs_list.html', {'clubs': clubs})
 
-
-def committees_list(request): 
-    if request.method == 'POST':
-        if not request.user.is_authenticated:  
-            print("User not logged in")
-            return JsonResponse({'error': 'User not authenticated'}, status=401)  # Return JSON, not HTML
-
-        try:
-            data = json.loads(request.body)
-            committees = data.get('committees', [])
-
-            for committee in committees:
-                committee_id = committee  # JavaScript sends an array of IDs
-                if not committee_id:
-                    continue
-
-                association = Associations.objects.get(id=committee_id)
-                print(f"Association: {association}")
-                user = request.user
-                user_profile = UserProfile.objects.get(id=user)  # Fix: Retrieve UserProfile using user
-                print(f"User Profile: {user_profile}")
-                # Save preference of user
-                preference = Preference(user=user_profile, club=association)
-                preference.save()
-
-
-            print("Received Committees:", committees)
-            return JsonResponse({'message': 'Preferences saved successfully'})
-
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON'}, status=400)
-        except Associations.DoesNotExist:
-            return JsonResponse({'error': 'Invalid committee ID'}, status=404)
-        except UserProfile.DoesNotExist:
-            return JsonResponse({'error': 'User profile not found'}, status=404)
-
-    # Handle GET request
-    committees = Associations.objects.filter(type='committees',status='approved')  
-    request.session['url'] = 'committees_list'
+def committees_list(request):
+    committees = Associations.objects.filter(type='committees',status__in=["approved", "delete_pending"])  
     return render(request, 'committees/committees_list.html', {'committees': committees})
+
+# def committees_list(request): 
+#     if request.method == 'POST':
+#         if not request.user.is_authenticated:  
+#             print("User not logged in")
+#             return JsonResponse({'error': 'User not authenticated'}, status=401)  # Return JSON, not HTML
+
+#         try:
+#             data = json.loads(request.body)
+#             committees = data.get('committees', [])
+
+#             for committee in committees:
+#                 committee_id = committee  # JavaScript sends an array of IDs
+#                 if not committee_id:
+#                     continue
+
+#                 association = Associations.objects.get(id=committee_id)
+#                 print(f"Association: {association}")
+#                 user = request.user
+#                 user_profile = UserProfile.objects.get(id=user)  # Fix: Retrieve UserProfile using user
+#                 print(f"User Profile: {user_profile}")
+#                 # Save preference of user
+#                 preference = Preference(user=user_profile, club=association)
+#                 preference.save()
+
+
+#             print("Received Committees:", committees)
+#             return JsonResponse({'message': 'Preferences saved successfully'})
+
+#         except json.JSONDecodeError:
+#             return JsonResponse({'error': 'Invalid JSON'}, status=400)
+#         except Associations.DoesNotExist:
+#             return JsonResponse({'error': 'Invalid committee ID'}, status=404)
+#         except UserProfile.DoesNotExist:
+#             return JsonResponse({'error': 'User profile not found'}, status=404)
+
+#     # Handle GET request
+#     committees = Associations.objects.filter(type='committees',status='approved')  
+#     request.session['url'] = 'committees_list'
+#     return render(request, 'committees/committees_list.html', {'committees': committees})
 
 
 # Club detail view
@@ -168,12 +171,15 @@ def edit_club_committee(request, pk):
             faculty_incharge = Faculty.objects.get(id__ssv_id=faculty_incharge_ssv_id)
             association.faculty_incharge = faculty_incharge
 
+        
+
         # Handle main image
         image = request.FILES.get('image')
         if image:
             association.image = image
 
         association.save()
+
 
         # Handle additional images
         images = request.FILES.getlist('images')
@@ -197,7 +203,18 @@ def delete_club_committee(request, pk):
         return HttpResponse("You do not have permission to delete this club/committee")
 
     if request.method == "POST":
-        association.delete()
+        association.status = "delete_pending"
+        association.save()
+
+        send_mail(
+            subject=f"Deletion Request for {association.name}",
+            message=f"Dear {association.faculty_incharge.id.full_name},\n\n"
+                    f"The {association.type} '{association.name}' has been requested for deletion by {association.created_by.id.full_name}. "
+                    f"Please review the request and approve it.\n\n",
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[association.faculty_incharge.id.id.email],
+            fail_silently=False,
+        )
         return redirect('home')
 
     return render(request, 'committees/confirm_delete.html', {'association': association})
