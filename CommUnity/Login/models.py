@@ -22,6 +22,7 @@ class UserProfile(models.Model):
     profile_picture = models.ImageField(upload_to='profile_pics/', default='profile_pics/default.jpg',null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    preferences = models.JSONField(default=list,null=True,blank=True) # New field for preferences
     def save(self, *args, **kwargs):
         # Automatically assign ssv_id if not provided
         if self.ssv_id is None:

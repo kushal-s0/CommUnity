@@ -10,54 +10,102 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from Login.models import UserProfile
 from members.models import CoreMember, Member
+
+
+
+from Login.models import UserProfile
 # List all clubs
 def club_list(request):
-    clubs = Associations.objects.filter(type='clubs',status__in=["approved", "delete_pending"]) 
-    return render(request, 'committees/clubs_list.html', {'clubs': clubs})
+    user = request.user
+    
+    
+    if request.method == "POST":
+        print("POST request received")
+        if not request.user.is_authenticated:  
+            print("User not logged in")
+            return JsonResponse({'error': 'User not authenticated'}, status=401)  # Return JSON, not HTML
+        
+        
+        data = json.loads(request.body)
+        club_id = int(data.get("club_id"))
+        selected = data.get("selected")
+        print("Received data:", club_id)
+
+        user_profile = UserProfile.objects.get(id=user)
+        preferences = UserProfile.objects.get(id=user).preferences
+        
+
+        if selected:
+            if club_id not in preferences:
+                preferences.append(club_id)  # Add to preferences
+        else:
+            if club_id in preferences:
+                preferences.remove(club_id)  # Remove from preferences
+        
+        user_profile.preferences = preferences
+        user_profile.save()
+        
+        print("Saved Preferences:", preferences)
+
+        return JsonResponse({"message": "Preferences updated", "preferences": preferences})
+
+    clubs = Associations.objects.filter(type='clubs',status__in=["approved", "delete_pending"])   
+
+    preferences = []
+    if request.user.is_authenticated:
+        preferences = UserProfile.objects.get(id=user).preferences
+
+    print("Preferences:", preferences)
+    context = {
+        'clubs': clubs,
+        'preferences': preferences
+    }
+    return render(request, 'committees/clubs_list.html', context)
+    
 
 def committees_list(request):
+    user = request.user
+    
+    
+    if request.method == "POST":
+        if not request.user.is_authenticated:  
+            print("User not logged in")
+            return JsonResponse({'error': 'User not authenticated'}, status=401)  # Return JSON, not HTML
+        
+        
+        data = json.loads(request.body)
+        committee_id = int(data.get("committee_id"))
+        selected = data.get("selected")
+        
+
+        user_profile = UserProfile.objects.get(id=user)
+        preferences = UserProfile.objects.get(id=user).preferences
+        
+
+        if selected:
+            if committee_id not in preferences:
+                preferences.append(committee_id)  # Add to preferences
+        else:
+            if committee_id in preferences:
+                preferences.remove(committee_id)  # Remove from preferences
+        
+        user_profile.preferences = preferences
+        user_profile.save()
+        print("Saved Preferences:", preferences)
+
+        return JsonResponse({"message": "Preferences updated", "preferences": preferences})
+
     committees = Associations.objects.filter(type='committees',status__in=["approved", "delete_pending"])  
-    return render(request, 'committees/committees_list.html', {'committees': committees})
 
-# def committees_list(request): 
-#     if request.method == 'POST':
-#         if not request.user.is_authenticated:  
-#             print("User not logged in")
-#             return JsonResponse({'error': 'User not authenticated'}, status=401)  # Return JSON, not HTML
+    preferences = []
+    if request.user.is_authenticated:
+        preferences = UserProfile.objects.get(id=user).preferences
+    context = {
+        'committees': committees,
+        'preferences': preferences
+    }
+    return render(request, 'committees/committees_list.html', context)
 
-#         try:
-#             data = json.loads(request.body)
-#             committees = data.get('committees', [])
-
-#             for committee in committees:
-#                 committee_id = committee  # JavaScript sends an array of IDs
-#                 if not committee_id:
-#                     continue
-
-#                 association = Associations.objects.get(id=committee_id)
-#                 print(f"Association: {association}")
-#                 user = request.user
-#                 user_profile = UserProfile.objects.get(id=user)  # Fix: Retrieve UserProfile using user
-#                 print(f"User Profile: {user_profile}")
-#                 # Save preference of user
-#                 preference = Preference(user=user_profile, club=association)
-#                 preference.save()
-
-
-#             print("Received Committees:", committees)
-#             return JsonResponse({'message': 'Preferences saved successfully'})
-
-#         except json.JSONDecodeError:
-#             return JsonResponse({'error': 'Invalid JSON'}, status=400)
-#         except Associations.DoesNotExist:
-#             return JsonResponse({'error': 'Invalid committee ID'}, status=404)
-#         except UserProfile.DoesNotExist:
-#             return JsonResponse({'error': 'User profile not found'}, status=404)
-
-#     # Handle GET request
-#     committees = Associations.objects.filter(type='committees',status='approved')  
-#     request.session['url'] = 'committees_list'
-#     return render(request, 'committees/committees_list.html', {'committees': committees})
 
 
 # Club detail view

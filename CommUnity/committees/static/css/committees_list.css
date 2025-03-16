@@ -97,8 +97,9 @@ a.committee-link:hover {
     font-size: 20px;
     margin-right: 10px;
     transition: color 0.3s ease-in-out;
+    color: #ccc; /* Default color */
 }
 
-.star-icon:hover {
-    color: #FFD700;
+.star-icon.selected {
+    color: #FFD700; /* Gold color when selected */
 }

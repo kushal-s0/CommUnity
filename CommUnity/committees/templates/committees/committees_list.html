@@ -5,10 +5,15 @@
 
 <div class="committees-list">
     <ul>
-        {% for committee in committees %}
+        {% for committee in committees %} 
             {% if committee.status == "approved" or committee.status == "delete_pending" %}
                 <li>
-                    <span class="star-icon" onclick="toggleSelection({{ committee.id }})">&#9734;</span>
+                    <span 
+                        class="star-icon {% if committee.id in preferences %}selected{% endif %}" 
+                        data-committee-id="{{ committee.id }}" 
+                        onclick="toggleSelection(this)">
+                        {% if committee.id in preferences %} &#9733; {% else %} &#9734; {% endif %}
+                    </span>
                     <a href="{% url 'committees_detail' pk=committee.id %}" class="committee-link">
                         {{ committee.name }}
                     </a> - {{ committee.description }}
@@ -24,6 +29,59 @@
 
 <a href="{% url 'home' %}" class="btn-back">Back to Home</a>
 
+<script>
+    function toggleSelection(element) {
+        let committeeId = element.getAttribute("data-committee-id");
+        let isSelected = element.classList.contains("selected");
+    
+        // Update UI immediately for a smooth experience
+        if (isSelected) {
+            element.innerHTML = "&#9734;"; // Empty star
+            element.classList.remove("selected");
+        } else {
+            element.innerHTML = "&#9733;"; // Filled star
+            element.classList.add("selected");
+        }
+    
+        // Send data to backend using fetch API
+        fetch("/committees/committees/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken(), // Function to get CSRF token
+            },
+            body: JSON.stringify({ committee_id: committeeId, selected: !isSelected }),
+        })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 401) { // If user is not logged in
+                    alert("You need to log in to save preferences.");
+                    window.location.href = "/accounts/login"; // Redirect to login page
+                    return;
+                }
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => console.log('Response:', data))
+        .catch(error => console.error('Error:', error));
+    }
+    
+    // Function to get CSRF token from the cookie
+    function getCSRFToken() {
+        let name = "csrftoken=";
+        let decodedCookie = decodeURIComponent(document.cookie);
+        let cookieArray = decodedCookie.split(';');
+        for (let i = 0; i < cookieArray.length; i++) {
+            let c = cookieArray[i].trim();
+            if (c.indexOf(name) === 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+</script>
+{% comment %} 
 <script>
     let selectedCommittees = [];
 
@@ -81,4 +139,4 @@
     function getCSRFToken() {
         return document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
     }
-</script>
+</script> {% endcomment %}

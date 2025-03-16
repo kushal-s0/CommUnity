@@ -8,6 +8,12 @@
         {% for club in clubs %}
             {% if club.status == "approved" or club.status == "delete_pending" %}
                 <li>
+                    <span 
+                        class="star-icon {% if club.id in preferences %}selected{% endif %}" 
+                        data-club-id="{{ club.id }}" 
+                        onclick="toggleSelection(this)">
+                        {% if club.id in preferences %} &#9733; {% else %} &#9734; {% endif %}
+                    </span>
                     <a href="{% url 'club_detail' pk=club.id %}" class="club-link">
                         {{ club.name }}
                     </a> 
@@ -24,3 +30,57 @@
 </div>
 
 <a href="{% url 'home' %}" class="btn-back">Back to Home</a>
+
+<script>
+    function toggleSelection(element) {
+        let clubId = element.getAttribute("data-club-id");
+        console.log(clubId);
+        let isSelected = element.classList.contains("selected");
+    
+        // Update UI immediately for a smooth experience
+        if (isSelected) {
+            element.innerHTML = "&#9734;"; // Empty star
+            element.classList.remove("selected");
+        } else {
+            element.innerHTML = "&#9733;"; // Filled star
+            element.classList.add("selected");
+        }
+    
+        // Send data to backend using fetch API
+        fetch("/committees/clubs/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken(), // Function to get CSRF token
+            },
+            body: JSON.stringify({ club_id: clubId, selected: !isSelected }),
+        })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 401) { // If user is not logged in
+                    alert("You need to log in to save preferences.");
+                    window.location.href = "/accounts/login"; // Redirect to login page
+                    return;
+                }
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => console.log('Response:', data))
+        .catch(error => console.error('Error:', error));
+    }
+    
+    // Function to get CSRF token from the cookie
+    function getCSRFToken() {
+        let name = "csrftoken=";
+        let decodedCookie = decodeURIComponent(document.cookie);
+        let cookieArray = decodedCookie.split(';');
+        for (let i = 0; i < cookieArray.length; i++) {
+            let c = cookieArray[i].trim();
+            if (c.indexOf(name) === 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+</script>
