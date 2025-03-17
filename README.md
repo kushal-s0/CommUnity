@@ -7,7 +7,7 @@ faculty email verification hold pe rakha hai badme karege
 <br>
 # tasks
 <br>
-Sagar - committee preferences for faculty
+Sagar - Member admission
 <br>
 Aditya - improving the CSS of committees and clubs 
 <br>
