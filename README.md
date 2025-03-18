@@ -7,7 +7,7 @@ faculty email verification hold pe rakha hai badme karege
 <br>
 # tasks
 <br>
-Sagar - Member admission
+Sagar - core member -> addmission create ,Member-> admission
 <br>
 Aditya - improving the CSS of committees and clubs 
 <br>
