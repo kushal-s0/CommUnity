@@ -11,7 +11,7 @@ Sagar - core member -> addmission create ,Member-> admission
 <br>
 Aditya - improving the CSS of committees and clubs 
 <br>
-Pragati - homepage backend 
+Pragati - faculty css
 <br>
 Kushal - committees backend --login unique && approve for the clubs and committees---login done working on approval
 <br>
