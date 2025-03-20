@@ -7,7 +7,7 @@ from Login.models import UserProfile
 # Core Members Model
 class CoreMember(models.Model):
     id = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True)
-    club = models.ForeignKey('committees.Associations', on_delete=models.CASCADE,null=True,blank=True)
+    assosiation = models.JSONField(default=list, blank=True)
     position = models.CharField(max_length=100,null=True,blank=True)
     can_approve_members = models.BooleanField(default=False)
     can_edit_events = models.BooleanField(default=False)
@@ -32,7 +32,7 @@ class CoreMember(models.Model):
 # Members Model
 class Member(models.Model):
     id = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True)
-    club = models.ForeignKey('committees.Associations', on_delete=models.CASCADE)
+    assosiation = models.JSONField(default=list, blank=True)
     position = models.CharField(max_length=100, blank=True, null=True)
     joined_at = models.DateTimeField(auto_now_add=True)
     NOTIFICATION_CHOICES = (
@@ -45,4 +45,3 @@ class Member(models.Model):
     def __str__(self):
         return f"{self.id},{self.id.full_name},{self.club}" 
 
-# Preferences Model

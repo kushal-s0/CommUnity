@@ -33,7 +33,9 @@
                             <i class="fa-solid fa-circle-user user-icon"></i>
                             <div class="dropdown-menu">
                                 <a href="#">Profile</a>
-                                <a href="{% url 'add_club_committee' %}" id="add-club-link" style="display: none;" >Add Club/Committee</a>
+                                <a href="{% url 'add_club_committee' %}" class="club-link" style="display: none;" >Add Club/Committee</a>
+                                <a href="{% url 'add_announcement' %}" class="club-link" style="display: none;" >Add Announcement</a>
+                                <a href="{% url 'add_event' %}" class="club-link" style="display: none;" >Add Event</a>
                                 <a href="#">Settings</a>
                                 <a href="{% url 'account_logout' %}">Logout</a>
                             </div>
@@ -41,14 +43,16 @@
                     </li>
                     <script>
                         document.addEventListener("DOMContentLoaded", function () {
-                            // Check user role
-                            const userRole = "{{ user.userprofile.role }}";  
-                            const addClubLink = document.getElementById("add-club-link");
-                
-                            if (userRole === "core_member") {
-                                addClubLink.style.display = "block"; // Show the link for core members
-                            }
-                        });
+                        const userRole = "{{ user.userprofile.role }}";  
+                        const addClubLinks = document.getElementsByClassName("club-link");
+
+                        if (userRole.trim() === "core_member") {
+                            Array.from(addClubLinks).forEach(club => {
+                                club.style.display = "block";
+                            });
+                        }
+                    });
+
                     </script>
                 {% else %}
                     <li><a href="{% url 'account_signup' %}" class="signup-btn">Sign Up</a></li>

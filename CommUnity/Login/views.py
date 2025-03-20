@@ -5,6 +5,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from Login.models import UserProfile
 from faculty.models import Faculty
 from members.models import CoreMember, Member
+from committees.models import Associations
 # Create your views here.
 
 
@@ -26,16 +27,12 @@ def home_view(request):
         if role == 'faculty':
             return redirect('faculty')
 
-#         #check if user is core member
-#         if role == 'core_member':
-#             return redirect('core_member')
-        
-#         if role == 'member':
-#             return redirect('member')
-        
-#         if role == 'non_participating':
-#             return render(request, 'account/home.html')
         else:
+            #check if user is core member
+            if role == 'core_member':
+                user = UserProfile.objects.get(id=user)
+                core_member = CoreMember.objects.get(id=user)
+                print(core_member)
             return render(request, 'account/home.html')
     else:
         return render(request, 'account/home.html')

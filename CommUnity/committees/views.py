@@ -11,6 +11,9 @@ from django.contrib.auth.models import User
 from Login.models import UserProfile
 from members.models import CoreMember, Member
 
+from .models import Announcement
+from .forms import AnnouncementForm 
+
 
 
 from Login.models import UserProfile
@@ -267,3 +270,38 @@ def delete_club_committee(request, pk):
 
     return render(request, 'committees/confirm_delete.html', {'association': association})
 
+def add_announcement(request):
+
+
+    if request.method == 'POST':
+        form = AnnouncementForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            print(data)
+            user = request.user
+            user = UserProfile.objects.get(id=user)
+
+            core_member = CoreMember.objects.get(id=user)
+            print("Core member :",core_member)
+            club=core_member.club
+            print("Club :",club)
+            # announcement = Announcement.objects.create(
+            #     title=data['title'],
+            #     message=data['message'],
+            #     created_by=core_member,
+            #     club=core_member.club
+            # )
+            # print(announcement)
+            # announcement.save()
+            # form.save()
+            return redirect('add_announcement')  # Redirect after successful submission
+    else:
+        form = AnnouncementForm()
+
+    return render(request, 'committees/add_announcement.html', {'form': form})
+
+
+
+def add_event(request):
+
+    return render(request, 'committees/add_event.html')
