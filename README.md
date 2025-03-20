@@ -16,12 +16,11 @@
 </p>
 
 ---
-
 <h3 align="center">
     🔹
-    <a href="https://github.com/CommUnity/issues">Report Bug</a> &nbsp; &nbsp;
+    <a href="https://github.com/kushal-s0/CommUnity/issues">Report Bug</a> &nbsp; &nbsp;
     🔹
-    <a href="https://github.com/CommUnity/issues">Request Feature</a>
+    <a href="https://github.com/kushal-s0/CommUnity/issues">Request Feature</a>
 </h3>
 
 ---
