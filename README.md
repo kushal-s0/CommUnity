@@ -1,94 +1,90 @@
-College Clubs & Committees Management System
+<h2 align="center">
+  🎓 College Clubs & Committees Management System
+</h2>
 
-🌟 Overview
+<p align="center">
+  A web-based platform built with Django, SQLite, HTML, CSS, and JavaScript to manage college clubs and committees efficiently.
+</p>
 
-The College Clubs & Committees Management System is a web-based platform built using Django, SQLite, HTML, CSS, and JavaScript that allows users to manage and organize college clubs and committees efficiently. The system provides role-based access, enabling Core Members, Faculty, and Associate Members to perform specific actions such as creating club profiles, making announcements, scheduling events, and handling approvals.
+<p align="center">
+  <a href="https://forthebadge.com">
+    <img src="https://forthebadge.com/images/badges/built-with-love.svg" alt="Built with Love" />
+  </a> &nbsp;
+  <a href="https://forthebadge.com">
+    <img src="https://forthebadge.com/images/badges/made-with-python.svg" alt="Made with Python" />
+  </a> &nbsp;
+  <a href="https://forthebadge.com">
+    <img src="https://forthebadge.com/images/badges/open-source.svg" alt="Open Source" />
+  </a>
+</p>
 
-🎯 Features
+---
 
-👥 User Roles & Authentication
+<h3 align="center">
+    🔹
+    <a href="https://github.com/your-repo/issues">Report Bug</a> &nbsp; &nbsp;
+    🔹
+    <a href="https://github.com/your-repo/issues">Request Feature</a>
+</h3>
 
-Google Authentication: Secure login with Google authentication.
+---
 
-Restricted Login: Only @somaiya.edu email addresses can sign up and access the platform.
+## 🌟 Overview
+The **College Clubs & Committees Management System** is a dynamic platform that allows **Core Members, Faculty, and Associate Members** to manage clubs, publish announcements, schedule events, and oversee approvals efficiently.
 
-Role-Based Access:
+---
 
-Core Members: Create and manage club profiles, request faculty approval for edits.
+## 🏛️ Features
 
-Faculty: Approve club modifications, manage the academic calendar, and oversee event scheduling.
+### 👥 User Roles & Authentication
+✅ **Google Authentication**: Secure login using Google.  
+✅ **Restricted Login**: Only `@somaiya.edu` email addresses can sign up.  
+✅ **Role-Based Access**:  
+&nbsp;&nbsp;&nbsp;&nbsp;📌 **Core Members**: Create and manage club profiles, request faculty approval.  
+&nbsp;&nbsp;&nbsp;&nbsp;📌 **Faculty**: Approve club changes, manage the academic calendar.  
+&nbsp;&nbsp;&nbsp;&nbsp;📌 **Associate Members**: Publish announcements, messages, upcoming events, and registrations.  
 
-Associate Members: Publish announcements, messages, upcoming events, and registration details.
+### 📢 Noticeboard & Event Scheduling
+✅ **Post announcements, upcoming events, and messages**.  
+✅ **Google Calendar Integration** for event scheduling.  
+✅ **Smart Scheduling**: Prevents conflicts by checking time and location availability.  
+✅ **Reverse Day Rule**: No events can be scheduled on restricted academic days.  
 
-🏛️ Club & Committee Management
+---
 
-Core Members can create club profiles with a name, description, and optional image.
+## 🚀 Tech Stack
+- **Backend**: Django, Python, SQLite
+- **Frontend**: HTML, CSS, JavaScript
+- **Authentication**: Google OAuth
+- **Database**: SQLite
+- **API Integrations**: Google Calendar API
 
-Clubs and Committees require faculty approval for any modifications.
+---
 
-List of all approved clubs and committees is displayed on the webpage.
+## 🛠 Installation & Setup
 
-📢 Noticeboard & Event Management
+<h3>1️⃣ Clone the Repository</h3>
 
-Associate Members can post announcements, upcoming events, and messages.
+```bash
+git clone https://github.com/your-repo-url.git
+cd college-clubs-management
 
-Events are integrated with Google Calendar.
+<h3>2️⃣ Create & Activate a Virtual Environment</h3>
+python -m venv venv
+source venv/bin/activate  # On Windows use: venv\Scripts\activate
 
-Users can register for events directly from the platform.
+<h3>3️⃣ Install Dependencies</h3>
+pip install -r requirements.txt
 
-📅 Smart Scheduling & Conflict Management
+<h3>4️⃣ Configure Environment Variables</h3>
+Create a .env file with the required Google API credentials.
+GOOGLE_CLIENT_ID=your-client-id
+GOOGLE_CLIENT_SECRET=your-client-secret
+ALLOWED_HOSTS=yourdomain.com
 
-Faculty can add academic schedules (e.g., exams, holidays).
+<h3>5️⃣ Run Migrations & Start Server</h3>
+python manage.py migrate
+python manage.py runserver
+🚀 Visit: http://127.0.0.1:8000/ to access the platform.
 
-Reverse Day Rule: No events can be scheduled on certain academic days.
-
-Time & Location-Based Slot Booking:
-
-If a time slot and location are already booked, no other event can be scheduled at the same time.
-
-🚀 Tech Stack
-
-Backend: Django, Python, SQLite
-
-Frontend: HTML, CSS, JavaScript
-
-Authentication: Google OAuth (via Django)
-
-Database: SQLite
-
-API Integrations: Google Calendar API
-
-🛠️ Setup & Installation
-
-1️⃣ Clone the Repository
-
-2️⃣ Create & Activate a Virtual Environment
-
-3️⃣ Install Dependencies
-
-4️⃣ Set Up Environment Variables
-
-Create a .env file and configure the required Google API credentials and Django settings.
-
-5️⃣ Run Migrations & Start Server
-
-Visit http://127.0.0.1:8000/ to access the platform.
-
-🎨 UI Preview
-
-
-
-📌 Future Enhancements
-
-Notifications for event approvals and announcements.
-
-More granular role-based permissions.
-
-Improved event filtering and search functionality.
-
-📜 License
-
-This project is licensed under the MIT License.
-
-Developed by Sagar, Kushal, Pragati, Aditya ✨
-
+<h2 align="center">👨‍💻 Developed By</h2> <p align="center"> <a href="https://github.com/Sagar-Shetty0804">Sagar</a> • <a href="https://github.com/kushal-s0">Kushal</a> • <a href="https://github.com/pTIWARI-20">Pragati</a> • <a href="https://github.com/aditya-s27">Aditya</a> </p> <p align="center"> ⭐ Give this project a star if you like it! </p> ```
