@@ -1,5 +1,5 @@
 <h2 align="center">
-  🎓 College Clubs & Committees Management System
+  🎓 CommUnity
 </h2>
 
 <p align="center">
@@ -13,9 +13,6 @@
   <a href="https://forthebadge.com">
     <img src="https://forthebadge.com/images/badges/made-with-python.svg" alt="Made with Python" />
   </a> &nbsp;
-  <a href="https://forthebadge.com">
-    <img src="https://forthebadge.com/images/badges/open-source.svg" alt="Open Source" />
-  </a>
 </p>
 
 ---
@@ -64,8 +61,6 @@ The **College Clubs & Committees Management System** is a dynamic platform that 
 ## 🛠 Installation & Setup
 
 <h3>1️⃣ Clone the Repository</h3>
-
-```bash
 git clone https://github.com/your-repo-url.git
 cd college-clubs-management
 
