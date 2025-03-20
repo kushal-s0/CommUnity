@@ -27,7 +27,7 @@ class CoreMember(models.Model):
     def has_permission(self, permission):
         return permission in self.permissions
     def __str__(self):
-        return f"{self.id},{self.club}"
+        return f"{self.id}"
     
 # Members Model
 class Member(models.Model):
@@ -43,5 +43,5 @@ class Member(models.Model):
 
 
     def __str__(self):
-        return f"{self.id},{self.id.full_name},{self.club}" 
+        return f"{self.id}" 
 

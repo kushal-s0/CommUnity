@@ -154,12 +154,16 @@ def approve_clubs(request):
             club_id = request.POST.get("club_id")
             action = request.POST.get("action")
             club = get_object_or_404(Associations, id=club_id)
+            
 
             # Ensure only assigned faculty can approve/reject
             if club.faculty_incharge != faculty:
                 return HttpResponse("You are not authorized to approve/reject this request.")
 
             if action == "approve":
+                member = club.created_by
+                core_member = CoreMember.objects.get(id=member)
+                core_member.assosiation.append(club_id)
                 club.status = "approved"  # Approve the club
 
             elif action == "reject":
@@ -167,6 +171,9 @@ def approve_clubs(request):
                     club.status = "approved"  # If delete is rejected, restore approval
                 club.status = "rejected"
             elif action == "approve_delete":
+                member = club.created_by
+                core_member = CoreMember.objects.get(id=member)
+                core_member.assosiation.delete(club_id)
                 club.delete()  # Faculty finally approves deletion
                 return redirect("approve_clubs")
 
