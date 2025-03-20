@@ -26,7 +26,7 @@
 ---
 
 ## 🌟 Overview
-The **College Clubs & Committees Management System** is a dynamic platform that allows **Core Members, Faculty, and Associate Members** to manage clubs, publish announcements, schedule events, and oversee approvals efficiently.
+The **CommUnity** is a dynamic platform that allows **Core Members, Faculty, and Associate Members** to manage clubs, publish announcements, schedule events, and oversee approvals efficiently.
 
 ## 🎥 Demo Video
 
