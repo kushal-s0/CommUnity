@@ -19,9 +19,9 @@
 
 <h3 align="center">
     🔹
-    <a href="https://github.com/your-repo/issues">Report Bug</a> &nbsp; &nbsp;
+    <a href="https://github.com/CommUnity/issues">Report Bug</a> &nbsp; &nbsp;
     🔹
-    <a href="https://github.com/your-repo/issues">Request Feature</a>
+    <a href="https://github.com/CommUnity/issues">Request Feature</a>
 </h3>
 
 ---
@@ -29,6 +29,9 @@
 ## 🌟 Overview
 The **College Clubs & Committees Management System** is a dynamic platform that allows **Core Members, Faculty, and Associate Members** to manage clubs, publish announcements, schedule events, and oversee approvals efficiently.
 
+## 🎥 Demo Video
+
+[![Watch the Demo](https://img.shields.io/badge/▶-Watch%20Demo-red)](https://drive.google.com/file/d/1gnXLSHoTurimSiFqCFEbPClosUyVyl-U/view?usp=sharing)
 ---
 
 ## 🏛️ Features
