@@ -108,11 +108,11 @@ def select_student(request):
             student = get_object_or_404(User, username=student_id)  # Assuming username is the student ID
             student_user = get_object_or_404(UserProfile, id=student)
             print(student_user)
-            student_user.role = 'Core Member'
+            student_user.role = 'core_member'
             student_user.save()
 
-            core_update = CoreMember.objects.create(id=student_user)
-            core_update.save()
+            # core_update = CoreMember.objects.create(id=student_user)
+            # core_update.save()
             # Do something with the selected student (e.g., add to a list, update, etc.)
             # Example: Returning student details
             return JsonResponse({
@@ -151,9 +151,11 @@ def approve_clubs(request):
         delete_requests = Associations.objects.filter(status='delete_pending', faculty_incharge=faculty)
 
         if request.method == "POST":
+            print('Post')
             club_id = request.POST.get("club_id")
             action = request.POST.get("action")
             club = get_object_or_404(Associations, id=club_id)
+            print(club)
             
 
             # Ensure only assigned faculty can approve/reject
@@ -162,8 +164,12 @@ def approve_clubs(request):
 
             if action == "approve":
                 member = club.created_by
-                core_member = CoreMember.objects.get(id=member)
-                core_member.assosiation.append(club_id)
+                print(member)
+                
+                member.assosiation.append(club_id)
+                member.save()
+
+                print(member.assosiation)
                 club.status = "approved"  # Approve the club
 
             elif action == "reject":
@@ -172,8 +178,9 @@ def approve_clubs(request):
                 club.status = "rejected"
             elif action == "approve_delete":
                 member = club.created_by
-                core_member = CoreMember.objects.get(id=member)
-                core_member.assosiation.delete(club_id)
+                member.assosiation.remove(club_id)
+                print(member.assosiation)
+                member.save()
                 club.delete()  # Faculty finally approves deletion
                 return redirect("approve_clubs")
 
