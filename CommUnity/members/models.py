@@ -7,7 +7,7 @@ from Login.models import UserProfile
 # Core Members Model
 class CoreMember(models.Model):
     id = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True)
-    assosiation = models.JSONField(default=list, blank=True)
+    assosiation = models.ForeignKey('committees.Associations', on_delete=models.CASCADE,null=True,blank=True)#change
     position = models.CharField(max_length=100,null=True,blank=True)
     can_approve_members = models.BooleanField(default=False)
     can_edit_events = models.BooleanField(default=False)

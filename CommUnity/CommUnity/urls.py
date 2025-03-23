@@ -24,7 +24,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('faculty/', include('faculty.urls')), 
-    path('committees/', include('committees.urls')), 
+    path('committees/', include('committees.urls')),
+    path('members/', include('members.urls')),
 ]
 
 if settings.DEBUG:

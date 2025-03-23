@@ -164,12 +164,12 @@ def approve_clubs(request):
 
             if action == "approve":
                 member = club.created_by
-                print(member)
+                # print(member)
                 
-                member.assosiation.append(club_id)
-                member.save()
+                # member.assosiation.append(club_id)
+                # member.save()
 
-                print(member.assosiation)
+                # print(member.assosiation)
                 club.status = "approved"  # Approve the club
 
             elif action == "reject":
@@ -178,9 +178,9 @@ def approve_clubs(request):
                 club.status = "rejected"
             elif action == "approve_delete":
                 member = club.created_by
-                member.assosiation.remove(club_id)
-                print(member.assosiation)
-                member.save()
+                # member.assosiation.remove(club_id)
+                # print(member.assosiation)
+                # member.save()
                 club.delete()  # Faculty finally approves deletion
                 return redirect("approve_clubs")
 

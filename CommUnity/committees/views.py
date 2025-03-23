@@ -14,6 +14,8 @@ from members.models import CoreMember, Member
 from .models import Announcement
 from .forms import AnnouncementForm 
 
+from django.contrib import messages
+
 
 
 from Login.models import UserProfile
@@ -142,7 +144,11 @@ def committees_detail(request, pk):
 @login_required
 def add_club_committee(request):
     faculties = Faculty.objects.all()
-
+    current_user = request.user
+    user_profile = current_user.userprofile
+    core_member = CoreMember.objects.get(id=user_profile)
+    if core_member.assosiation != None:
+        return redirect('home')
     if request.method == "POST":
         print("POST Data:", request.POST)
         faculty_incharge_ssv_id = request.POST.get('faculty_incharge')
@@ -175,10 +181,12 @@ def add_club_committee(request):
             status='pending'
         )
 
+        core_member.assosiation = club
         if image:
             club.image = image
 
         club.save()
+        core_member.save()
 
         images = request.FILES.getlist('images')
         for image in images:
