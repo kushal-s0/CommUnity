@@ -64,7 +64,7 @@ The **CommUnity** is a dynamic platform that allows **Core Members, Faculty, and
 
 <h3>1️⃣ Clone the Repository</h3>
 git clone https://github.com/your-repo-url.git
-cd college-clubs-management
+cd CommUnity
 
 <h3>2️⃣ Create & Activate a Virtual Environment</h3>
 python -m venv venv
@@ -73,15 +73,18 @@ source venv/bin/activate  # On Windows use: venv\Scripts\activate
 <h3>3️⃣ Install Dependencies</h3>
 pip install -r requirements.txt
 
+
 <h3>4️⃣ Configure Environment Variables</h3>
 Create a .env file with the required Google API credentials.
 GOOGLE_CLIENT_ID=your-client-id
 GOOGLE_CLIENT_SECRET=your-client-secret
 ALLOWED_HOSTS=yourdomain.com
 
+
 <h3>5️⃣ Run Migrations & Start Server</h3>
 python manage.py migrate
 python manage.py runserver
+
 🚀 Visit: http://127.0.0.1:8000/ to access the platform.
 
-<h2 align="center">👨‍💻 Developed By</h2> <p align="center"> <a href="https://github.com/Sagar-Shetty0804">Sagar</a> • <a href="https://github.com/kushal-s0">Kushal</a> • <a href="https://github.com/pTIWARI-20">Pragati</a> • <a href="https://github.com/aditya-s27">Aditya</a> </p> <p align="center"> ⭐ Give this project a star if you like it! </p> ```
+<h2 align="center">👨‍💻 Developed By</h2> <p align="center"> <a href="https://github.com/Sagar-Shetty0804">Sagar</a> • <a href="https://github.com/kushal-s0">Kushal</a> • <a href="https://github.com/pTIWARI-20">Pragati</a> • <a href="https://github.com/aditya-s27">Aditya</a> </p> <p align="center"> ⭐ Give this project a star if you like it! </p> 
