@@ -40,7 +40,11 @@ def search_members(request):
         data = json.loads(request.body)
         query = data.get('query', '').lower()
 
-        students = UserProfile.objects.filter(name__icontains=query) | UserProfile.objects.filter(email__icontains=query)
+        students = UserProfile.objects.filter(
+            (Q(name__icontains=query) | Q(email__icontains=query)) & 
+            (Q(role='non_participant') | Q(role='member'))
+        )
+        print(students.query) 
         student_list = [{'name': student.name, 'email': student.email} for student in students]
 
         return JsonResponse({'students': student_list})
@@ -56,7 +60,10 @@ def add_member(request):
             users = get_user_model().objects.filter(Q(username__icontains=query) | Q(email__icontains=query))
 
             # Get matching UserProfile records for these users
-            students = UserProfile.objects.filter(id__in=users.values_list('id', flat=True))
+            students = UserProfile.objects.filter(
+                Q(id__in=users.values_list('id', flat=True)) &
+                (Q(role='non_participating') | Q(role='member'))
+            )
 
             # Serialize data
             student_list = [{'id': student.id.username, 'name': student.full_name, 'email': student.id.email} for student in students]
@@ -66,6 +73,7 @@ def add_member(request):
     return render(request, 'add_member.html')
 
 def select_member(request):
+    print("Select Member")
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -83,14 +91,23 @@ def select_member(request):
             elif role == 'core_member':
                 student_user.role = 'core_member'
                 
-
             student_user.save()
+            current_user = UserProfile.objects.get(id=request.user)
+
+            club = get_object_or_404(Associations, created_by=current_user)
+            print("Current User :",current_user)
 
             if role == 'member':
                 member = Member.objects.get_or_create(id=student_user)
+                print("Member :",member)
+                member.assosiation.append(club.id)
+                member.save()
 
             elif role == 'core_member':
                 core_member = CoreMember.objects.get_or_create(id=student_user)
+                print("Core Member :",core_member)
+                core_member.association = club
+                core_member.save()
 
 
             return JsonResponse({
