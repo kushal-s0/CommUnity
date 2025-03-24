@@ -32,6 +32,22 @@
         <button type="submit" class="btn btn-danger">Delete Committee</button>
     </form>
 {% endif %}
+{% if is_owner %}
+    <div class="button-container">
+        <form action="{% url 'transfer_ownership' committee.id %}" method="post">
+            {% csrf_token %}
+            <label for="new_owner">Select New Owner:</label>
+            <select name="new_owner" required>
+                {% for core_member in core_members %}
+                    <option value="{{ core_member.id.id.username }}, {{ core_member.id.full_name }}, {{ core_member.id.role }}">
+                        {{ core_member }} 
+                    </option>
+                {% endfor %}
+            </select>                    
+            <button type="submit" class="btn btn-warning">Transfer Ownership</button>
+        </form>
+    </div>
+{% endif %}
 
 <a href="{% url 'committees_list' %}" class="btn">Back to Committees List</a>
 

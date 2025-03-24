@@ -11,5 +11,6 @@ urlpatterns = [
     path('club/<int:pk>/delete/', views.delete_club_committee, name='delete_club_committee'),
     path('add_announcement/', views.add_announcement, name='add_announcement'),
     path('add_event/', views.add_event, name='add_event'),
+    path('transfer-ownership/<int:pk>/', views.transfer_ownership, name='transfer_ownership'),
 ]
 

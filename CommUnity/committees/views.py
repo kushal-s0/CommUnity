@@ -118,13 +118,18 @@ def club_detail(request, pk):
     club = get_object_or_404(Associations, pk=pk)
 
     is_creator = False
+    is_owner = False
     if request.user.is_authenticated and request.user.userprofile.role == 'core_member':
         core_member = CoreMember.objects.get(id=request.user.userprofile)
         is_creator = club.created_by == core_member
+        is_owner = club.owner == core_member
+    core_members = CoreMember.objects.all().exclude(id=club.owner.id)
 
     return render(request, 'committees/club_detail.html', {
         'club': club,
-        'is_creator': is_creator
+        'is_creator': is_creator,
+        'is_owner': is_owner,
+        'core_members': core_members
     })
 
 
@@ -134,11 +139,14 @@ def committees_detail(request, pk):
     url = request.session.get('url')
     print(type(url),url)
     is_creator = False
+    is_owner = False
     if request.user.is_authenticated and request.user.userprofile.role == 'core_member':
         core_member = CoreMember.objects.get(id=request.user.userprofile)
         is_creator = committee.created_by == core_member
+        is_owner = committee.owner == core_member
+    core_members = CoreMember.objects.exclude(id=committee.owner.id)
 
-    return render(request, 'committees/committee_detail.html', context={'committee': committee, 'url': url, 'is_creator': is_creator})
+    return render(request, 'committees/committee_detail.html', context={'committee': committee, 'url': url, 'is_creator': is_creator,'is_owner': is_owner,'core_members': core_members})
 
 
 @login_required
@@ -178,6 +186,7 @@ def add_club_committee(request):
             type=association_type,
             faculty_incharge=faculty_incharge,
             created_by=core_member,
+            owner=core_member,
             status='pending'
         )
 
@@ -313,3 +322,38 @@ def add_announcement(request):
 def add_event(request):
 
     return render(request, 'committees/add_event.html')
+
+
+
+@login_required
+def transfer_ownership(request, pk):
+    club = get_object_or_404(Associations, pk=pk)
+
+    if request.method == "POST":
+        new_owner_str = request.POST.get("new_owner")
+        try:
+            username, full_name, role = new_owner_str.split(", ")
+            new_owner = CoreMember.objects.get(
+                id__id__username=username,  # CustomUser.username
+                id__full_name=full_name,  # UserProfile.full_name
+                id__role=role  # UserProfile.role
+            )
+            print(f"✅ Found CoreMember: {new_owner}")  # Debugging
+        except (ValueError, CoreMember.DoesNotExist):
+            print("❌ Error: Invalid core member selection")
+            return HttpResponse("Invalid core member selected", status=400)
+
+        if new_owner == club.owner:
+            return HttpResponse("You are already the owner")
+
+        club.owner = new_owner
+        club.save()
+        return redirect('club_detail', pk=pk)
+
+    core_members = CoreMember.objects.exclude(id=club.owner.id)
+
+    return render(request, 'committees/club_detail.html', {
+        'club': club,
+        'core_members': core_members
+    })
+
