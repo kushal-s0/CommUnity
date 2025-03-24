@@ -93,7 +93,8 @@ def add_core_member_view(request):
 
             return JsonResponse({'students': student_list})
     
-    return render(request, 'add_core_member.html')
+    all_students = UserProfile.objects.all()
+    return render(request, 'add_core_member.html', {'all_students': all_students})
 
 def select_student(request):
     if request.method == 'POST':

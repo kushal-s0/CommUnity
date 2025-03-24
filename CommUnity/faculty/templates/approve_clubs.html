@@ -1,16 +1,92 @@
+{% extends "base.html" %}
+{% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Approve Clubs/Committees</title>
-</head>
-<body>
+{% block title %}<title>Approve Clubs/Committees</title>{% endblock title %}
+
+{% block extra_css %}
+<style>
+    .container {
+        max-width: 800px;
+        margin: auto;
+        padding: 0 20px;
+    }
+
+    h2 {
+        text-align: center;
+        color: black !important;
+        margin-top: 50px !important;
+    }
+
+    .container .card {
+        background: #f8f9fa;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .container .cardCreate{
+        border: 5px solid #28a745;
+    }
+
+    .container .cardDelete{
+        border: 5px solid #dc3545;
+    }
+
+    .indContainer{
+        border: 2px solid #0056b3; 
+        margin-bottom: 10px;
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .card h3 {
+        margin: 0;
+        color: #333;
+    }
+
+    .card p {
+        margin: 5px 0;
+        color: #555;
+    }
+
+    form {
+        margin-top: 10px;
+    }
+
+    button {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 0 !important;
+        cursor: pointer;
+        margin-right: 5px;
+        font-size: 14px;
+    }
+    
+    button[name="action"][value="approve"],
+    button[name="action"][value="reject"],
+    button[name="action"][value="approve_delete"] {
+        background-color: #00171F;
+        border-radius: 50px !important;
+        color: white;
+        width: 100px;
+        margin-right: 8px;
+    }
+
+    button:hover {
+        background-color: #0056b3 !important;
+    }
+</style>
+
+{% endblock extra_css %}
+
+{% block content%}
+    <div class="container">
     <h2>Pending Clubs/Committees</h2>
 
+    <div class="card cardCreate">
     {% for club in pending_clubs %}
-        <div>
+        <div class="indContainer">
             <h3>{{ club.name }}</h3>
             <p>{{ club.description }}</p>
             <p>Created by: {{ club.created_by.id.full_name }}</p>
@@ -23,27 +99,31 @@
                 </form>  
             {% else %}    
             <p><strong>Approval pending from {{ club.faculty_incharge.name |default:"Unknown Faculty"}}.</strong></p>
-            {% endif %}     
-        </div>
-    {% empty %}
-        <p>No pending clubs/committees.</p>
-    {% endfor %}
+            {% endif %} 
+        </div>    
+        {% empty %}
+            <p>No pending clubs/committees.</p>
+        {% endfor %}
+    </div>
     
 
     <h2>Delete Requests</h2>
+    <div class="card cardDelete">
     {% for club in delete_requests %}
-        <div class="club-card">
+        <div class="indContainer">
             <h3>Delete Request: {{ club.name }}</h3>
             <p>{{ club.description }}</p>
             <form method="POST" action="{% url 'approve_clubs' %}">
                 {% csrf_token %}
                 <input type="hidden" name="club_id" value="{{ club.id }}">
-                <button type="submit" name="action" value="approve_delete" class="btn reject">Approve Delete</button>
-                <button type="submit" name="action" value="reject" class="btn reject">Reject</button>
+                <button type="submit" name="action" value="approve_delete" class="btn reject">Delete</button>
+                <button type="submit" name="action" value="reject" class="btn reject">Cancel</button>
             </form>
         </div>
     {% empty %}
         <p>No delete requests.</p>
     {% endfor %}
-</body>
-</html>
+    </div>
+        
+    </div>
+{% endblock content %}

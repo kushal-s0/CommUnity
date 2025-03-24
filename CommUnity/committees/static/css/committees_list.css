@@ -1,18 +1,22 @@
 /* General Styles */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #FFFFFF;
-    color: #00171F;
+    height: 100%;
     margin: 0;
-    padding: 20px;
-    text-align: center;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, #00171F, #007EA7, #00A8E8);
+    color: #ffffff;
+    background-size: cover;
+    background-attachment: fixed;
 }
 
 /* Page Title */
 h1 {
-    color: #003459;
-    font-size: 28px;
-    margin-bottom: 20px;
+    color: black;
+    font-size: 32px;
+    margin: 50px auto 20px;
+    text-align: center;
 }
 
 /* Committees List Container */
@@ -20,8 +24,8 @@ h1 {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    background: #f9f9f9;
-    border-radius: 12px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 15px;
     box-shadow: 0px 4px 8px rgba(0, 23, 31, 0.2);
 }
 
@@ -34,7 +38,7 @@ ul {
 li {
     background: #FFFFFF;
     padding: 15px;
-    margin: 10px 0;
+    margin: 20px 0;
     border-radius: 8px;
     box-shadow: 0px 2px 6px rgba(0, 23, 31, 0.2);
     transition: transform 0.2s ease-in-out;
@@ -51,7 +55,7 @@ a.committee-link {
     font-weight: bold;
     color: #007EA7;
     text-decoration: none;
-    transition: color 0.3s ease-in-out;
+    transition: color 0.3 ease-in-out;
 }
 
 a.committee-link:hover {
@@ -67,26 +71,25 @@ a.committee-link:hover {
 
 /* Back Button */
 .btn-back {
-    display: inline-block;
     text-decoration: none;
     font-size: 16px;
     font-weight: bold;
     padding: 12px 20px;
-    border-radius: 8px;
+    border-radius: 50px;
     transition: all 0.3s ease-in-out;
     box-shadow: 0px 4px 6px rgba(0, 52, 89, 0.2);
     border: none;
     cursor: pointer;
-    width: 100%;
     max-width: 250px;
     text-align: center;
-    background: linear-gradient(135deg, #003459, #007EA7);
+    background: #00A8E8;
     color: #FFFFFF;
-    margin-top: 20px;
+    margin: 30px auto;
+    display: block;
 }
 
 .btn-back:hover {
-    background: linear-gradient(135deg, #00171F, #005F8A);
+    background: #007EA7;
     transform: translateY(-2px);
     box-shadow: 0px 6px 12px rgba(0, 52, 89, 0.3);
 }

@@ -1,42 +1,55 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Search</title>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}<title>Student Search</title>{% endblock title %}
+
+{% block extra_css %}
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
         .container {
-            max-width: 600px;
+            display: flex;
+            max-width: 90%;
             margin: auto;
             background: white;
+            margin-top: 50px;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        input {
+        
+        /* Left-aligned Search Panel */
+        .search-panel {
+            width: 25%;
+            padding: 20px;
+            background: #00334E;
+            color: white;
+            border-radius: 8px;
+            margin-right: 20px;
+        }
+        
+        /* Search Input */
+        .search-panel input {
             width: 100%;
             padding: 10px;
-            margin-bottom: 10px;
+            margin-top: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            box-sizing: border-box;
         }
+        
+        /* Centered Student List */
+        .student-section {
+            flex-grow: 1; /* Takes remaining space */
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        /* Ensure student list is styled properly */
         .student-list {
             list-style: none;
             padding: 0;
         }
-        .student-list li {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-        .student-list li:last-child {
-            border-bottom: none;
-        }
+        
         .student-btn {
             width: 100%;
             padding: 8px;
@@ -48,16 +61,54 @@
             text-align: left;
             font-size: 16px;
         }
+        
+        
+        h2{
+            color: black;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .student-list li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .student-list li:last-child {
+            border-bottom: none;
+        }
         .student-btn:hover {
             background-color: #0056b3;
         }
     </style>
-</head>
-<body>
+{% endblock extra_css %}
+
+{% block content %}
     <div class="container">
-        <h2>Search Students</h2>
-        <input type="text" id="search" placeholder="Search by name or email" onkeyup="filterStudents()">
-        <ul class="student-list" id="studentList"></ul>
+        <div class="search-panel">
+            <h2>Search Students 🔍</h2>
+            <input type="text" id="search" placeholder="Search by name or email" onkeyup="filterStudents()">
+            <ul class="student-list" id="studentList"></ul>
+        </div>
+
+        <div class="student-section">
+            <h2>All Students 📋</h2>
+            <ul class="student-list">
+                {% for student in all_students %}
+                    <li>
+                        <button class="student-btn" onclick="sendStudentIdToBackend('{{ student.id }}')">
+                            {{ student.id.username }} : {{ student.full_name }} - {{ student.id.email }}
+                        </button>
+                    </li>
+                {% empty %}
+                    <li>No students found.</li>
+                {% endfor %}
+            </ul> 
+        </div>
     </div>
 
     <script>
@@ -116,5 +167,4 @@
                 ?.split('=')[1];
         }
     </script>
-</body>
-</html>
+{% endblock content %}

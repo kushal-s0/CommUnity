@@ -4,9 +4,27 @@
 <title>Committee Members</title>
 {% endblock title %}
 
+{% block extra_css %}
+<style>
+.content {
+    margin-left: 0 !important;
+}
+h1{
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center horizontally */
+    height: 80vh; /* Adjust height so it's below navbar */
+    text-align: center;
+    color: black !important;
+    width: 100%;
+    padding-top: 50px;            
+}
+</style>
+{% endblock extra_css%}
+
 {% block content %}
 
-<h1>Committee Members</h1>
+<h1 >Committee Members</h1>
 
 {% for core_member in core_members %}
     <div class="card mb-3">

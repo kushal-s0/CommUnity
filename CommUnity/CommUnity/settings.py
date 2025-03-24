@@ -136,7 +136,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "Login/static",  # Adjust according to where you created your static folder
     BASE_DIR / "committees/static",
-    # BASE_DIR / "faculty/static",
+    BASE_DIR / "faculty/static",
     # BASE_DIR / "events/static",
     # BASE_DIR / "members/static",
 ]
