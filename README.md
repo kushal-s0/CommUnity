@@ -63,24 +63,24 @@ The **CommUnity** is a dynamic platform that allows **Core Members, Faculty, and
 ## 🛠 Installation & Setup
 
 <h3>1️⃣ Clone the Repository</h3>
-```
+```bash
 git clone https://github.com/your-repo-url.git
 cd CommUnity
 ```
 
 <h3>2️⃣ Create & Activate a Virtual Environment</h3>
-```
+```bash
 python -m venv venv
 source venv/bin/activate  # On Windows use: venv\Scripts\activate
 ```
 
 <h3>3️⃣ Install Dependencies</h3>
-```
+```bash
 pip install -r requirements.txt
 ```
 
 <h3>4️⃣ Configure Environment Variables</h3>
-```
+```bash
 Create a .env file with the required Google API credentials.
 GOOGLE_CLIENT_ID=your-client-id
 GOOGLE_CLIENT_SECRET=your-client-secret
@@ -88,7 +88,7 @@ ALLOWED_HOSTS=yourdomain.com
 ```
 
 <h3>5️⃣ Run Migrations & Start Server</h3>
-```
+```bash
 python manage.py migrate
 python manage.py runserver
 ```
