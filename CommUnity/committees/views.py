@@ -142,7 +142,7 @@ def club_detail(request, pk):
 def committees_detail(request, pk):
     committee = get_object_or_404(Associations, pk=pk)
     url = request.session.get('url')
-    print(type(url),url)
+    print("url:",type(url),url)
     is_creator = False
     is_owner = False
     can_edit = False

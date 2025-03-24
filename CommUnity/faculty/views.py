@@ -31,12 +31,23 @@ def profile_view(request):
     print(associations)
     context = {'user': user,'user_profile': user_profile,'faculty': faculty,'associations': associations}
     return render(request, 'profile.html', context)
-def committee_member_view( request,pk):
+def committee_member_view(request, pk):
     committee = get_object_or_404(Associations, pk=pk)
-    members = Member.objects.filter(club=committee)
-    core_members = CoreMember.objects.filter(club=committee)
-    context = {'committee': committee, 'members': members, 'core_members': core_members}
-    print(context)
+
+    # Fetch all members and filter manually
+    all_members = Member.objects.all()
+    members = [member for member in all_members if pk in member.assosiation]  # Assuming assosiation is a list
+
+    # Fetch core members normally
+    core_members = CoreMember.objects.filter(assosiation=committee)
+
+    context = {
+        'committee': committee,
+        'members': members,
+        'core_members': core_members
+    }
+
+    print(context)  # Debugging
 
     return render(request, 'committee_member.html', context)
 
