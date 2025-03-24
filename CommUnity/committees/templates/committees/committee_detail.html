@@ -24,9 +24,10 @@
 {% empty %}
     <p>No additional images uploaded.</p>
 {% endfor %}
-
+{% if can_edit %}
+    <a href="{% url 'edit_club_committee' committee.id %}" class="btn btn-primary">Edit Committee</a>       
+{% endif %}
 {% if is_creator %}
-    <a href="{% url 'edit_club_committee' committee.id %}" class="btn btn-primary">Edit Committee</a>
     <form action="{% url 'delete_club_committee' committee.id %}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure?');">
         {% csrf_token %}
         <button type="submit" class="btn btn-danger">Delete Committee</button>

@@ -119,17 +119,22 @@ def club_detail(request, pk):
 
     is_creator = False
     is_owner = False
+    can_edit = False
+
     if request.user.is_authenticated and request.user.userprofile.role == 'core_member':
         core_member = CoreMember.objects.get(id=request.user.userprofile)
         is_creator = club.created_by == core_member
         is_owner = club.owner == core_member
+        if core_member:
+            can_edit = CoreMember.objects.filter(assosiation=club,id=core_member.id).exists()
     core_members = CoreMember.objects.all().exclude(id=club.owner.id)
 
     return render(request, 'committees/club_detail.html', {
         'club': club,
         'is_creator': is_creator,
         'is_owner': is_owner,
-        'core_members': core_members
+        'core_members': core_members,
+        'can_edit': can_edit
     })
 
 
@@ -140,13 +145,16 @@ def committees_detail(request, pk):
     print(type(url),url)
     is_creator = False
     is_owner = False
+    can_edit = False
     if request.user.is_authenticated and request.user.userprofile.role == 'core_member':
         core_member = CoreMember.objects.get(id=request.user.userprofile)
         is_creator = committee.created_by == core_member
         is_owner = committee.owner == core_member
-    core_members = CoreMember.objects.exclude(id=committee.owner.id)
+        if core_member:
+            can_edit = CoreMember.objects.filter(assosiation=committee,id=core_member.id).exists()
+    core_members = CoreMember.objects.all().exclude(id=committee.owner.id)
 
-    return render(request, 'committees/committee_detail.html', context={'committee': committee, 'url': url, 'is_creator': is_creator,'is_owner': is_owner,'core_members': core_members})
+    return render(request, 'committees/committee_detail.html', context={'committee': committee, 'url': url, 'is_creator': is_creator,'is_owner': is_owner,'core_members': core_members,'can_edit': can_edit})
 
 
 @login_required
@@ -220,8 +228,11 @@ def edit_club_committee(request, pk):
     association = get_object_or_404(Associations, pk=pk)
 
     # Check if current user is a core member and the creator
-    if request.user.userprofile.role != 'core_member' or association.created_by.id != request.user.userprofile:
+    core_members = CoreMember.objects.filter(assosiation=association)
+
+    if request.user.userprofile.role != 'core_member' or not core_members.filter(id=request.user.userprofile).exists():
         return HttpResponse("You do not have permission to edit this club/committee")
+
 
     faculties = Faculty.objects.all()
 
@@ -267,7 +278,7 @@ def delete_club_committee(request, pk):
     association = get_object_or_404(Associations, pk=pk)
 
     # Check if current user is a core member and the creator
-    if request.user.userprofile.role != 'core_member' or association.created_by.id != request.user.userprofile:
+    if request.user.userprofile.role != 'core_member' or association.owner.id != request.user.userprofile:
         return HttpResponse("You do not have permission to delete this club/committee")
 
     if request.method == "POST":
