@@ -81,7 +81,10 @@ def search_students(request):
         data = json.loads(request.body)
         query = data.get('query', '').lower()
 
-        students = UserProfile.objects.filter(name__icontains=query) | UserProfile.objects.filter(email__icontains=query)
+        students = UserProfile.objects.filter(
+            (Q(name__icontains=query) | Q(email__icontains=query)) & 
+            (Q(role='non_participant') | Q(role='member'))
+        )
         student_list = [{'name': student.name, 'email': student.email} for student in students]
 
         return JsonResponse({'students': student_list})
@@ -97,7 +100,10 @@ def add_core_member_view(request):
             users = get_user_model().objects.filter(Q(username__icontains=query) | Q(email__icontains=query))
 
             # Get matching UserProfile records for these users
-            students = UserProfile.objects.filter(id__in=users.values_list('id', flat=True))
+            students = UserProfile.objects.filter(
+                Q(id__in=users.values_list('id', flat=True)) &
+                (Q(role='non_participating') | Q(role='member'))
+            )
 
             # Serialize data
             student_list = [{'id': student.id.username, 'name': student.full_name, 'email': student.id.email} for student in students]

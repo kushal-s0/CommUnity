@@ -164,18 +164,18 @@ def add_club_committee(request):
     user_profile = current_user.userprofile
     core_member = CoreMember.objects.get(id=user_profile)
     if core_member.assosiation != None:
-        return redirect('home')
+        return HttpResponse("You are already a member of a committee")
     if request.method == "POST":
         print("POST Data:", request.POST)
         faculty_incharge_ssv_id = request.POST.get('faculty_incharge')
 
         if not faculty_incharge_ssv_id or faculty_incharge_ssv_id == "None":
-            return HttpResponse("Please select a valid faculty member")
+            return HttpResponse("Bhen ke lode faculty tera baap select karega. Utter Waste")
 
         try:
             faculty_incharge = Faculty.objects.get(id__ssv_id=faculty_incharge_ssv_id)
         except Faculty.DoesNotExist:
-            return HttpResponse("Faculty not found")
+            return HttpResponse("Bhen ke lode faculty tera baap select karega")
 
         # Only core members can add clubs/committees
         if request.user.userprofile.role != 'core_member':
