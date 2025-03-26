@@ -1,1 +1,86 @@
-hello
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Announcement</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            width: 50%;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        input, textarea, select {
+            margin-bottom: 10px;
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        button {
+            background: #0088cc;
+            color: white;
+            padding: 10px;
+            border: none;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #006699;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Add New Announcement</h2>
+
+        <form method="post">
+            {% csrf_token %}
+            <label>Title:</label>
+            <input type="text" name="title" required>
+
+            <label>Message:</label>
+            <textarea name="message" rows="4" required></textarea>
+
+            <label>Club:</label>
+            <select name="club" required>
+                <option value="">Select Club</option>
+                {% for club in clubs %}
+                    <option value="{{ club.id }}">{{ club.name }}</option>
+                {% endfor %}
+            </select>
+
+            <label>Created By:</label>
+            <select name="created_by" required>
+                <option value="">Select Member</option>
+                {% comment %} {% for core_member in core_members %}
+                    <option value="{{ core_member.id.ssv_id }}">{{ core_member.id.full_name }}</option>
+                {% endfor %}
+                {% for member in members %}
+                    <option value="{{ member.id.ssv_id }}">{{ member.id.full_name }}</option>
+                {% endfor %} {% endcomment %}
+                <option value="{{ user }}">{{ user.full_name }}</option>
+            </select>
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+</body>
+</html>

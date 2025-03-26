@@ -24,7 +24,7 @@ class Associations(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(upload_to='association_images/', null=True, blank=True)
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending')
-    owner = models.ForeignKey(CoreMember, on_delete=models.SET_NULL, null=True, blank=True,related_name='owned_associations')
+    owner = models.ForeignKey('members.CoreMember', on_delete=models.SET_NULL, null=True, blank=True,related_name='owned_associations')
     # edit_request_data = models.JSONField(null=True, blank=True) 
 
     def __str__(self):
@@ -35,7 +35,7 @@ class Announcement(models.Model):
     title = models.CharField(max_length=255)
     message = models.TextField()
     club = models.ForeignKey('committees.Associations', on_delete=models.CASCADE)
-    created_by = models.ForeignKey('members.CoreMember', on_delete=models.CASCADE)
+    created_by = models.ForeignKey('Login.UserProfile', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)    
 
     def __str__(self):  
