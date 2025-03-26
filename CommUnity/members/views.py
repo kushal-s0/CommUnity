@@ -157,9 +157,9 @@ def select_member(request):
                 
                 # Ensure association updates correctly
                 with transaction.atomic():
-                    core_member.association = club
+                    core_member.assosiation = club
                     core_member.save()
-                print("Core Member Association Updated:", core_member.association)
+                print("Core Member Association Updated:", core_member.assosiation)
                 core_member.refresh_from_db()
                 print("After updating Core Member :",core_member.assosiation)
 
