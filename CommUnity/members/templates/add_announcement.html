@@ -75,7 +75,7 @@
                 {% for member in members %}
                     <option value="{{ member.id.ssv_id }}">{{ member.id.full_name }}</option>
                 {% endfor %} {% endcomment %}
-                <option value="{{ user }}">{{ user.full_name }}</option>
+                <option value="{{ user.ssv_id }}">{{ user.full_name }}</option>
             </select>
 
             <button type="submit">Submit</button>

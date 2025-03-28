@@ -57,13 +57,14 @@ def add_announcement(request):
         created_by_id = request.POST.get('created_by')
 
         if title and message and club_id and created_by_id:
-            print(title, message, club_id, created_by_id)
-            # Announcement.objects.create(
-            #     title=title,
-            #     message=message,
-            #     club_id=club_id,
-            #     created_by_id=created_by_id
-            # )
+            club = Associations.objects.get(id=club_id)
+            created_by = UserProfile.objects.get(ssv_id=created_by_id)
+            Announcement.objects.create(
+                title=title,
+                message=message,
+                club=club,
+                created_by=created_by
+            )
             return redirect('home')
 
     context = {
