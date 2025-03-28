@@ -43,11 +43,11 @@ def add_announcement(request):
 
     if role == 'core_member':
         core_member = CoreMember.objects.get(id=user_profile)
-        associations = [core_member.assosiation] if core_member.assosiation else []
+        associations = [core_member.association] if core_member.association else []
 
     elif role == 'member':
         member = Member.objects.get(id=user_profile)
-        member_association_ids = member.assosiation.values_list('id', flat=True)  # Get list of IDs
+        member_association_ids = member.association.values_list('id', flat=True)  # Get list of IDs
         associations = Associations.objects.filter(id__in=member_association_ids)  # Get matching Associations
 
     if request.method == "POST":
@@ -148,7 +148,7 @@ def select_member(request):
                 print("Member")
                 member = Member.objects.get(id=student_user)
                 print("Member :",member)
-                member.assosiation.append(club.id)
+                member.association.append(club.id)
                 member.save()
 
             elif role == 'core_member':
@@ -157,11 +157,11 @@ def select_member(request):
                 
                 # Ensure association updates correctly
                 with transaction.atomic():
-                    core_member.assosiation = club
+                    core_member.association = club
                     core_member.save()
-                print("Core Member Association Updated:", core_member.assosiation)
+                print("Core Member Association Updated:", core_member.association)
                 core_member.refresh_from_db()
-                print("After updating Core Member :",core_member.assosiation)
+                print("After updating Core Member :",core_member.association)
 
             return JsonResponse({
                 'message': f'Student {student.username} selected as {role} successfully!',

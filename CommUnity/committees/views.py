@@ -128,7 +128,7 @@ def club_detail(request, pk):
         is_creator = club.created_by == core_member
         is_owner = club.owner == core_member
         if core_member:
-            can_edit = CoreMember.objects.filter(assosiation=club,id=core_member.id).exists()
+            can_edit = CoreMember.objects.filter(association=club,id=core_member.id).exists()
     core_members = CoreMember.objects.all().exclude(id=club.owner.id)
 
     return render(request, 'committees/club_detail.html', {
@@ -153,7 +153,7 @@ def committees_detail(request, pk):
         is_creator = committee.created_by == core_member
         is_owner = committee.owner == core_member
         if core_member:
-            can_edit = CoreMember.objects.filter(assosiation=committee,id=core_member.id).exists()
+            can_edit = CoreMember.objects.filter(association=committee,id=core_member.id).exists()
     core_members = CoreMember.objects.all().exclude(id=committee.owner.id)
 
     return render(request, 'committees/committee_detail.html', context={'committee': committee, 'url': url, 'is_creator': is_creator,'is_owner': is_owner,'core_members': core_members,'can_edit': can_edit})
@@ -165,7 +165,7 @@ def add_club_committee(request):
     current_user = request.user
     user_profile = current_user.userprofile
     core_member = CoreMember.objects.get(id=user_profile)
-    if core_member.assosiation != None:
+    if core_member.association != None:
         return HttpResponse("You are already a member of a committee")
     if request.method == "POST":
         print("POST Data:", request.POST)
@@ -200,7 +200,7 @@ def add_club_committee(request):
             status='pending'
         )
 
-        core_member.assosiation = club
+        core_member.association = club
         if image:
             club.image = image
 
@@ -230,7 +230,7 @@ def edit_club_committee(request, pk):
     association = get_object_or_404(Associations, pk=pk)
 
     # Check if current user is a core member and the creator
-    core_members = CoreMember.objects.filter(assosiation=association)
+    core_members = CoreMember.objects.filter(association=association)
 
     if request.user.userprofile.role != 'core_member' or not core_members.filter(id=request.user.userprofile).exists():
         return HttpResponse("You do not have permission to edit this club/committee")

@@ -3,11 +3,10 @@ from django.db import models
 from Login.models import UserProfile
 
 # Create your models here.
-
 # Core Members Model
 class CoreMember(models.Model):
     id = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True)
-    assosiation = models.ForeignKey('committees.Associations', on_delete=models.CASCADE,null=True,blank=True)#change
+    association = models.ForeignKey('committees.Associations', on_delete=models.CASCADE,null=True,blank=True)#change
     position = models.CharField(max_length=100,null=True,blank=True)
     can_approve_members = models.BooleanField(default=False)
     can_edit_events = models.BooleanField(default=False)
@@ -32,7 +31,7 @@ class CoreMember(models.Model):
 # Members Model
 class Member(models.Model):
     id = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True)
-    assosiation = models.JSONField(default=list, blank=True)
+    association = models.JSONField(default=list, blank=True)
     position = models.CharField(max_length=100, blank=True, null=True)
     joined_at = models.DateTimeField(auto_now_add=True)
     NOTIFICATION_CHOICES = (
