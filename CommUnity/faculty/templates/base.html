@@ -103,8 +103,8 @@
             const toggleButton = document.querySelector(".sidebar-toggle");
         
             // Ensure sidebar is always visible on page load
-            sidebar.classList.add("active");
-            document.body.classList.add("sidebar-active");
+            sidebar.classList.remove("active");
+            document.body.classList.remove("sidebar-active");
         
             toggleButton.addEventListener("click", function (event) {
                 event.stopPropagation(); // Prevents click from propagating to document

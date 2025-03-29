@@ -5,25 +5,30 @@
 
 {% block extra_css %}
     <style>
-        .container {
+        .content{
+            padding: 0 !important;
+            align-items: center !important;
             display: flex;
-            max-width: 90%;
-            margin: auto;
-            background: white;
-            margin-top: 50px;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            justify-content: center; /* Centers content horizontally */
+            align-items: flex-start;
+            gap: 30px; /* Space between search panel and student section */
+            margin-top: 80px;
         }
         
-        /* Left-aligned Search Panel */
+        /* Search Panel - Fixed Sidebar */
         .search-panel {
-            width: 25%;
+            width: 350px;
             padding: 20px;
-            background: #00334E;
+            background: rgba(0,0,0,0.5);
             color: white;
-            border-radius: 8px;
-            margin-right: 20px;
+            position: fixed;
+            left: 0;
+            top: 80px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+            float: left;
+            height: 100vh;
+            overflow-y: auto;
         }
         
         /* Search Input */
@@ -31,64 +36,121 @@
             width: 100%;
             padding: 10px;
             margin-top: 10px;
-            border: 1px solid #ccc;
+            border: none;
             border-radius: 4px;
             box-sizing: border-box;
+            background: white;
+            color: black;
         }
-        
-        /* Centered Student List */
+
+/* Scrollable student list */
+#studentList {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+    overflow-y: auto;
+}
+
+/* Uniform background for list items */
+.search-panel #studentList li {
+    padding: 10px;
+    background: rgba(0, 51, 78, 0.95); /* Same as panel */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+    border-radius: 5px;
+    margin-bottom: 5px; /* Spacing between items */
+    min-height: auto !important;
+    width: 100% !important;
+    display: block;
+    white-space: nowrap;
+}
+
+/* Hover effect */
+#studentList li:hover {
+    background: rgba(0, 80, 120, 0.95);
+}
+
+/* Remove bottom border from last item */
+#studentList li:last-child {
+    border-bottom: none;
+}
+
+.student-btn{
+    border-radius: 4px;
+    background: rgba(0, 51, 78, 0.95);
+    border: none;
+    color: white;
+}
+        /* Student Section - Centered */
         .student-section {
-            flex-grow: 1; /* Takes remaining space */
+            max-width: 800px;
+            width: 100%;
             background: white;
             padding: 20px;
-            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            margin: 0 auto; /* Offset for sidebar */
         }
         
-        /* Ensure student list is styled properly */
+        /* Student List */
         .student-list {
             list-style: none;
             padding: 0;
         }
         
-        .student-btn {
-            width: 100%;
-            padding: 8px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-align: left;
-            font-size: 16px;
-        }
-        
-        
-        h2{
-            color: black;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
         .student-list li {
             padding: 10px;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #ccc;
+            gap: 15px;
+            align-items: center;
+            background: white;
+            display: flex;
+            min-height: 80px !important;
+            box-sizing: border box;
         }
+        
         .student-list li:last-child {
             border-bottom: none;
         }
-        .student-btn:hover {
-            background-color: #0056b3;
+
+        .profile-pic {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.5) !important; /* Light background */
+            color: white;
+            font-size: 24px;
+            border: 2px solid #00A8E8;
+            z-index: 1;
+            flex-shrink: 0;
         }
+        
+        .profile-pic img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .fa-user{
+            color: #00A8E8;
+        }
+        
+
+        .student-info {
+            flex-grow: 1;
+            text-align: left;
+        }
+              
     </style>
 {% endblock extra_css %}
 
 {% block content %}
-    <div class="container">
         <div class="search-panel">
             <h2>Search Students 🔍</h2>
             <input type="text" id="search" placeholder="Search by name or email" onkeyup="filterStudents()">
@@ -96,20 +158,27 @@
         </div>
 
         <div class="student-section">
-            <h2>All Students 📋</h2>
+            <h2>All Students 📋✏️</h2>
             <ul class="student-list">
                 {% for student in all_students %}
                     <li>
-                        <button class="student-btn" onclick="sendStudentIdToBackend('{{ student.id }}')">
-                            {{ student.id.username }} : {{ student.full_name }} - {{ student.id.email }}
-                        </button>
+                        <div class="profile-pic">
+                        {%if student.profile_picture%}
+                            <img src="{{student.profile_picture.url}}" alt="Profile Picture">
+                        {% else %}
+                            <i class="fa-solid fa-user"></i>
+                        {% endif %}
+                        </div>
+                        <div class="student-info">
+                            <h6 style="color:#007EA7">{{ student.full_name }}</h6>
+                            <p><b>Username:</b> {{ student.id.username }}&nbsp;&nbsp;&nbsp;<b>Email:</b> {{ student.id.email }}</p>
+                        </div>
                     </li>
                 {% empty %}
                     <li>No students found.</li>
                 {% endfor %}
             </ul> 
         </div>
-    </div>
 
     <script>
         function filterStudents() {
