@@ -349,87 +349,301 @@ body.sidebar-active::before {
 .prev { left: 10px; }
 .next { right: 10px; }
 
+/* committee card thingi magigie */
+
 .committee-section {
-    text-align: center;
-    margin-top: 60px;
+  text-align: center;
+  margin-top: 60px;
 }
 
 .committee-heading {
-    font-size: 32px;
-    font-weight: bold;
-    color: #00171F;
+  font-size: 32px;
+  font-weight: bold;
+  color: #00171F;
 }
 
 .committee-subheading {
-    font-size: 18px;
-    color: #555;
-    margin-bottom: 20px;
+  font-size: 18px;
+  color: #555;
+  margin-bottom: 20px;
 }
 
 .committee-container {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin-bottom: 50px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 50px;
+  padding: 0 20px;
 }
 
 .committee-card {
-    flex: 1 1 calc(30% - 20px); /* Three cards in first row */
-    min-width: 280px; /* Prevent too small cards */
-    max-width: 350px; /* Limit card width */
-    width: 300px;
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
-    text-align: left;
-    border-top: 5px solid;
+  flex: 1 1 calc(30% - 20px);
+  min-width: 280px;
+  max-width: 350px;
+  width: 300px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  border-top: 5px solid #00A8E8;
+  overflow: hidden;
+  position: relative;
+  height: 180px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.tech {
-    border-color: #00A8E8;
+.committee-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
 }
 
-.cultural {
-    border-color: #00A8E8;
-}
-
-.sports {
-    border-color: #00A8E8;
-}
-
-.social{
-    border-color: #00A8E8;
-}
-
-.others{
-    border-color: #00A8E8;
+.card-header {
+  padding: 20px;
+  position: relative;
+  z-index: 2;
 }
 
 .committee-card h3 {
-    font-size: 20px;
-    font-weight: bold;
-    color:#333;
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  margin-top: 0;
+  position: relative;
 }
 
-.committee-card p {
-    font-size: 14px;
-    color: #666;
+.content-container {
+  position: relative;
+  height: 100px;
+  overflow: hidden;
+  z-index: 2;
 }
 
-.committee-card ul {
-    list-style: none;
-    padding: 0;
-    margin-top: 10px;
+.description {
+  font-size: 14px;
+  color: #666;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 0 20px;
+  transition: opacity 0.3s ease, visibility 0.3s;
+  width: 100%;
+  box-sizing: border-box;
+  visibility: visible;
+  opacity: 1;
 }
 
-.main-dashboard {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 10px;
-    flex-wrap: wrap;
+.committee-list {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  box-sizing: border-box;
+  transform: translateY(100%);
+  transition: transform 0.4s ease;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #00A8E8 #f0f0f0;
+}
+
+.committee-card:hover .description {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.committee-card:hover .committee-list {
+  transform: translateY(0);
+}
+
+.committee-list p {
+  padding: 8px 20px;
+  margin: 0;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  color: #444;
+}
+
+/* Scrollbar styling */
+.committee-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.committee-list::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+
+.committee-list::-webkit-scrollbar-thumb {
+  background-color: #00A8E8;
+  border-radius: 10px;
+}
+
+/* Card category colors */
+.tech { 
+  border-color: #00A8E8; 
+}
+
+.cultural { 
+  border-color: #FF6B6B; 
+}
+
+.sports { 
+  border-color: #4CAF50; 
+}
+
+.social { 
+  border-color: #FFC107; 
+}
+
+.others { 
+  border-color: #9C27B0; 
+}
+
+/* Match scrollbar color to card border */
+.tech .committee-list::-webkit-scrollbar-thumb { 
+  background-color: #00A8E8; 
+}
+
+.cultural .committee-list::-webkit-scrollbar-thumb { 
+  background-color: #FF6B6B; 
+}
+
+.sports .committee-list::-webkit-scrollbar-thumb { 
+  background-color: #4CAF50; 
+}
+
+.social .committee-list::-webkit-scrollbar-thumb { 
+  background-color: #FFC107; 
+}
+
+.others .committee-list::-webkit-scrollbar-thumb { 
+  background-color: #9C27B0; 
+}
+
+/* Background Icons Styling - Now using emojis */
+.bg-icon {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    opacity: 0.2;
+    z-index: 1;
+    top: 50px;
+    right: 20px;
+    transition: all 0.5s ease;
+  }
+
+/* Tech Icon */
+.tech .bg-icon {
+    color: #00A8E8;
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  /* Cultural Icon */
+  .cultural .bg-icon {
+    color: #FF6B6B;
+    animation: pulse 3s ease-in-out infinite;
+  }
+  
+  /* Sports Icon */
+  .sports .bg-icon {
+    color: #4CAF50;
+    animation: bounce 2s ease-in-out infinite;
+  }
+  
+  /* Social Icon */
+  .social .bg-icon {
+    color: #FFC107;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  
+  /* Others - Surprise Box container */
+  .others .bg-icon-container {
+    position: absolute;
+    top: 40px;
+    right: 20px;
+    width: 70px;
+    height: 70px;
+    z-index: 1;
+  }
+
+/* Main box */
+.others .bg-icon-box {
+    width: 40px;
+    height: 40px;
+    opacity: 0.2;
+    color: #9C27B0;
+  }
+  
+  /* Animated elements inside "Others" */
+  .others .bg-icon-star1,
+  .others .bg-icon-star2,
+  .others .bg-icon-circle,
+  .others .bg-icon-squiggle {
+    width: 20px;
+    height: 20px;
+    opacity: 0.2;
+    color: #9C27B0;
+    position: absolute;
+  }
+  
+  .others .bg-icon-star1 {
+    top: -10px;
+    left: 0;
+    animation: popOut 4s ease-in-out infinite;
+  }
+  
+  .others .bg-icon-star2 {
+    top: -5px;
+    right: 0;
+    animation: popOut 4s ease-in-out 1s infinite;
+  }
+  
+  .others .bg-icon-circle {
+    top: 5px;
+    right: -10px;
+    animation: popOut 4s ease-in-out 2s infinite;
+  }
+  
+  .others .bg-icon-squiggle {
+    bottom: -10px;
+    left: 5px;
+    animation: popOut 4s ease-in-out 3s infinite;
+  }
+
+/* Hide icons on hover */
+.committee-card:hover .bg-icon,
+.committee-card:hover .bg-icon-container {
+  opacity: 0;
+  transform: translateX(50px);
+}
+
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-15px) rotate(10deg); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Adjusted animation to make elements pop higher */
+@keyframes popOut {
+  0% { transform: translateY(0) scale(0.5); opacity: 0; }
+  20% { transform: translateY(-20px) scale(1.2); opacity: 0.2; }
+  40% { transform: translateY(-30px) scale(1); opacity: 0.2; }
+  60% { transform: translateY(-40px) scale(0.8); opacity: 0.2; }
+  100% { transform: translateY(-50px) scale(0.5); opacity: 0; }
 }
 
 #notice-board {
