@@ -350,7 +350,6 @@ body.sidebar-active::before {
 .next { right: 10px; }
 
 /* committee card thingi magigie */
-
 .committee-section {
   text-align: center;
   margin-top: 60px;
@@ -522,95 +521,100 @@ body.sidebar-active::before {
   background-color: #9C27B0; 
 }
 
-/* Background Icons Styling - Now using emojis */
+/* Background Icons Styling */
 .bg-icon {
-    position: absolute;
-    width: 60px;
-    height: 60px;
-    opacity: 0.2;
-    z-index: 1;
-    top: 50px;
-    right: 20px;
-    transition: all 0.5s ease;
-  }
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  opacity: 0.3;
+  z-index: 1;
+  top: 50px;
+  right: 20px;
+  transition: all 0.5s ease;
+}
 
 /* Tech Icon */
 .tech .bg-icon {
-    color: #00A8E8;
-    animation: float 3s ease-in-out infinite;
-  }
-  
-  /* Cultural Icon */
-  .cultural .bg-icon {
-    color: #FF6B6B;
-    animation: pulse 3s ease-in-out infinite;
-  }
-  
-  /* Sports Icon */
-  .sports .bg-icon {
-    color: #4CAF50;
-    animation: bounce 2s ease-in-out infinite;
-  }
-  
-  /* Social Icon */
-  .social .bg-icon {
-    color: #FFC107;
-    animation: pulse 2s ease-in-out infinite;
-  }
-  
-  /* Others - Surprise Box container */
-  .others .bg-icon-container {
-    position: absolute;
-    top: 40px;
-    right: 20px;
-    width: 70px;
-    height: 70px;
-    z-index: 1;
-  }
+  color: #00A8E8;
+  animation: floatRotate 3s ease-in-out infinite;
+}
 
-/* Main box */
+/* Cultural Icon - Updated with new theater masks */
+.cultural .bg-icon {
+  color: #FF6B6B;
+  animation: pulseRotate 3s ease-in-out infinite;
+  width: 70px;
+  height: 70px;
+}
+
+/* Sports Icon */
+.sports .bg-icon {
+  color: #4CAF50;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+/* Social Icon - Wave animation */
+.social .bg-icon {
+  color: #FFC107;
+  animation: wave 3s ease-in-out infinite;
+}
+
+/* Others - Repositioned Surprise Box container */
+.others .bg-icon-container {
+  position: absolute;
+  top: 80px;
+  right: 30px;
+  width: 70px;
+  height: 70px;
+  z-index: 1;
+}
+
+/* Main box - repositioned to bottom */
 .others .bg-icon-box {
-    width: 40px;
-    height: 40px;
-    opacity: 0.2;
-    color: #9C27B0;
-  }
-  
-  /* Animated elements inside "Others" */
-  .others .bg-icon-star1,
-  .others .bg-icon-star2,
-  .others .bg-icon-circle,
-  .others .bg-icon-squiggle {
-    width: 20px;
-    height: 20px;
-    opacity: 0.2;
-    color: #9C27B0;
-    position: absolute;
-  }
-  
-  .others .bg-icon-star1 {
-    top: -10px;
-    left: 0;
-    animation: popOut 4s ease-in-out infinite;
-  }
-  
-  .others .bg-icon-star2 {
-    top: -5px;
-    right: 0;
-    animation: popOut 4s ease-in-out 1s infinite;
-  }
-  
-  .others .bg-icon-circle {
-    top: 5px;
-    right: -10px;
-    animation: popOut 4s ease-in-out 2s infinite;
-  }
-  
-  .others .bg-icon-squiggle {
-    bottom: -10px;
-    left: 5px;
-    animation: popOut 4s ease-in-out 3s infinite;
-  }
+  width: 40px;
+  height: 40px;
+  opacity: 0.3;
+  color: #9C27B0;
+  position: absolute;
+  top: 15px;
+  left: 15px;
+}
+
+/* Animated elements inside "Others" - repositioned to be above box */
+.others .bg-icon-star1,
+.others .bg-icon-star2,
+.others .bg-icon-circle,
+.others .bg-icon-squiggle {
+  width: 20px;
+  height: 20px;
+  opacity: 0.2;
+  color: #9C27B0;
+  position: absolute;
+}
+
+.others .bg-icon-star1 {
+  top: -30px;
+  left: 5px;
+  animation: popOut 4s ease-in-out 1s infinite;
+}
+
+.others .bg-icon-star2 {
+  top: -35px;
+  right: 5px;
+  animation: popOut 4s ease-in-out 2s infinite;
+}
+
+.others .bg-icon-circle {
+  top: -25px;
+  right: 20px;
+  animation: popOut 4s ease-in-out 0s infinite;
+}
+
+.others .bg-icon-squiggle {
+  top: -50px;
+  left: 25px;
+  animation: popOut 4s ease-in-out 0s infinite;
+}
 
 /* Hide icons on hover */
 .committee-card:hover .bg-icon,
@@ -633,17 +637,55 @@ body.sidebar-active::before {
 
 @keyframes pulse {
   0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  50% { transform: scale(1.15); }
   100% { transform: scale(1); }
 }
+@keyframes pulseRotate {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.1) rotate(10deg);
+  }
+  50% {
+    transform: scale(1.15) rotate(0deg);
+  }
+  75% {
+    transform: scale(1.1) rotate(-10deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
 
-/* Adjusted animation to make elements pop higher */
+/* Wave animation for social icon */
+@keyframes wave {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-10deg); }
+  50% { transform: rotate(0deg); }
+  75% { transform: rotate(10deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* Updated animation for objects flowing out of box */
 @keyframes popOut {
-  0% { transform: translateY(0) scale(0.5); opacity: 0; }
-  20% { transform: translateY(-20px) scale(1.2); opacity: 0.2; }
-  40% { transform: translateY(-30px) scale(1); opacity: 0.2; }
-  60% { transform: translateY(-40px) scale(0.8); opacity: 0.2; }
-  100% { transform: translateY(-50px) scale(0.5); opacity: 0; }
+  0% { transform: translateY(30px) scale(0.5); opacity: 0; }
+  20% { transform: translateY(10px) scale(1.2); opacity: 0.3; }
+  40% { transform: translateY(0px) scale(1); opacity: 0.3; }
+  60% { transform: translateY(-10px) scale(0.8); opacity: 0.3; }
+  100% { transform: translateY(-20px) scale(0.5); opacity: 0; }
+}
+
+@keyframes floatRotate {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(45deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
 }
 
 #notice-board {
