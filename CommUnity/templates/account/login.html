@@ -1,7 +1,0 @@
-{% extends "account/login.html" %}  <!-- Extend the Allauth login template -->
-{% load static %}  <!-- Load static files -->
-
-{% block extra_head %}  <!-- Add your CSS link in the correct block -->
-    <link rel="stylesheet" href="{% static 'css/login.css' %}">
-    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}" class="favicon">
-{% endblock extra_head %}
