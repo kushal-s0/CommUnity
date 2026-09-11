@@ -1,0 +1,18 @@
+<a class="event-card" href="{% url 'event_details' event.id %}">
+    <div class="date-block" aria-hidden="true">
+        <span class="date-month">{{ event.date_time|date:"M" }}</span>
+        <span class="date-day">{{ event.date_time|date:"d" }}</span>
+    </div>
+    <div class="event-card-body">
+        <div class="event-card-meta">
+            <span class="cat-dot cat-{{ event.association.category|lower }}" aria-hidden="true"></span>
+            <span>{{ event.association.name }}</span>
+        </div>
+        <h3>{{ event.title }}</h3>
+        <p class="event-card-when">
+            <span><i class="fa-regular fa-clock"></i> {{ event.date_time|date:"D, j M · g:i A" }}</span>
+            <span><i class="fa-solid fa-location-dot"></i> {{ event.location }}</span>
+        </p>
+    </div>
+    {% if show_status %}{% include "partials/status_badge.html" %}{% elif event.phase == 'ongoing' %}<span class="badge badge-live"><span class="badge-dot"></span>Live now</span>{% endif %}
+</a>

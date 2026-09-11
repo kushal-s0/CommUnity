@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}{{ profile.display_name }}{% endblock %}
+
+{% block content %}
+<div class="card" style="overflow:hidden;margin-bottom:24px">
+    <div style="height:120px;background:linear-gradient(120deg,var(--navy-700),var(--blue-600))"></div>
+    <div class="card-body" style="padding-top:0">
+        <div class="row between" style="align-items:flex-end;margin-top:-56px">
+            {% include "partials/avatar.html" with profile=profile size="xl" %}
+            <a class="btn btn-secondary" href="{% url 'edit_profile' %}"><i class="fa-solid fa-pen"></i>Edit profile</a>
+        </div>
+        <h1 style="margin-top:14px">{{ profile.display_name }}</h1>
+        <div class="row">
+            <span class="badge badge-info">{{ profile.get_role_display }}</span>
+            <span class="muted small"><i class="fa-regular fa-envelope"></i> {{ profile.id.email }}</span>
+            <span class="muted small"><i class="fa-regular fa-calendar"></i> Joined {{ profile.created_at|date:"M Y" }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-2">
+    <section class="card">
+        <div class="card-head"><h2>Details</h2></div>
+        <div class="card-body">
+            <dl class="meta-list">
+                {% if faculty %}
+                    <div class="meta-item"><i class="fa-solid fa-building-columns"></i><div><dt>Department</dt><dd>{{ faculty.department|default:"—" }}</dd></div></div>
+                    <div class="meta-item"><i class="fa-solid fa-id-badge"></i><div><dt>Designation</dt><dd>{{ faculty.designation|default:"—" }}</dd></div></div>
+                {% endif %}
+                {% if core %}
+                    <div class="meta-item"><i class="fa-solid fa-people-group"></i><div><dt>Team</dt><dd>
+                        {% if core.association %}
+                            <a href="{{ core.association.get_absolute_url }}">{{ core.association.name }}</a>
+                            {% if core.association.owner_id == core.pk %}<span class="badge badge-outline">Owner</span>{% endif %}
+                        {% else %}Not part of a team yet{% endif %}
+                    </dd></div></div>
+                {% endif %}
+                {% if core or member %}
+                    <div class="meta-item"><i class="fa-solid fa-user-tag"></i><div><dt>Position</dt><dd>{% if core %}{{ core.position|default:"Core member" }}{% else %}{{ member.position|default:"Member" }}{% endif %}</dd></div></div>
+                {% endif %}
+                <div class="meta-item"><i class="fa-solid fa-hashtag"></i><div><dt>CommUnity ID</dt><dd>{{ profile.ssv_id }}</dd></div></div>
+            </dl>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="card-head"><h2>{% if faculty %}In-charge of{% else %}Clubs &amp; committees{% endif %}</h2></div>
+        <ul class="list">
+            {% if faculty %}
+                {% for a in in_charge %}
+                    <li><a class="list-item" href="{{ a.get_absolute_url }}">
+                        <span class="cat-dot cat-{{ a.category|lower }}"></span>
+                        <div class="list-item-body"><span class="list-item-title">{{ a.name }}</span><span class="small muted">{{ a.get_type_display|slice:":-1" }}</span></div>
+                        <span class="badge badge-{{ a.status }}">{{ a.get_status_display }}</span>
+                    </a></li>
+                {% empty %}
+                    <li class="list-item muted small">Not in charge of any club or committee yet.</li>
+                {% endfor %}
+            {% else %}
+                {% for a in member_associations %}
+                    <li><a class="list-item" href="{{ a.get_absolute_url }}">
+                        <span class="cat-dot cat-{{ a.category|lower }}"></span>
+                        <div class="list-item-body"><span class="list-item-title">{{ a.name }}</span></div>
+                        <span class="badge badge-approved">Member</span>
+                    </a></li>
+                {% endfor %}
+                {% for a in followed %}
+                    <li><a class="list-item" href="{{ a.get_absolute_url }}">
+                        <span class="cat-dot cat-{{ a.category|lower }}"></span>
+                        <div class="list-item-body"><span class="list-item-title">{{ a.name }}</span></div>
+                        <span class="badge badge-outline"><i class="fa-solid fa-star"></i> Following</span>
+                    </a></li>
+                {% endfor %}
+                {% if not member_associations and not followed %}
+                    <li class="list-item muted small">Follow clubs and committees to see them here.</li>
+                {% endif %}
+            {% endif %}
+        </ul>
+    </section>
+</div>
+
+{% if registrations %}
+<section class="section">
+    <div class="section-head"><h2>Event history</h2></div>
+    <div class="card">
+        <div class="table-wrap">
+            <table class="table">
+                <thead><tr><th>Event</th><th>Organised by</th><th>Date</th><th>Attendance</th></tr></thead>
+                <tbody>
+                {% for r in registrations %}
+                    <tr>
+                        <td><a class="title-link" href="{% url 'event_details' r.event.id %}">{{ r.event.title }}</a></td>
+                        <td>{{ r.event.association.name }}</td>
+                        <td class="nowrap">{{ r.event.date_time|date:"j M Y" }}</td>
+                        <td>
+                            {% if r.attended %}<span class="badge badge-approved"><i class="fa-solid fa-check"></i> Attended</span>
+                            {% elif r.event.is_completed %}<span class="badge badge-cancelled">Not marked</span>
+                            {% else %}<span class="badge badge-info">Registered</span>{% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

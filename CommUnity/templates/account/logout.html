@@ -1,7 +1,15 @@
-{% extends "account/logout.html" %} 
-{% load static %}  <!-- Load static files -->
+{% extends "account/base_manage.html" %}
+{% block head_title %}Log out{% endblock head_title %}
 
-{% block extra_head %}  <!-- Add your CSS link in the correct block -->
-    <link rel="stylesheet" href="{% static 'css/logout.css' %}">
-    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}" class="favicon">
-{% endblock extra_head %}
+{% block content %}
+<h1>Log out?</h1>
+<p class="lead">You'll need to log in again to manage your clubs and events.</p>
+<form method="post" action="{% url 'account_logout' %}">
+    {% csrf_token %}
+    {% if redirect_field_value %}
+        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+    {% endif %}
+    <button type="submit">Log out</button>
+</form>
+<p class="auth-foot"><a href="{% url 'home' %}">Stay logged in</a></p>
+{% endblock content %}

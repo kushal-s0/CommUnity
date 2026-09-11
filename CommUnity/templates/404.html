@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Page not found{% endblock %}
+
+{% block content %}
+<div class="container-narrow" style="margin:40px auto">
+    <div class="card">
+        <div class="empty" style="padding:56px 24px">
+            <span class="empty-icon"><i class="fa-solid fa-compass"></i></span>
+            <h1>Page not found</h1>
+            <p>The page you're looking for doesn't exist, or you don't have access to it.</p>
+            <div class="row" style="justify-content:center">
+                <a class="btn btn-primary" href="{% url 'home' %}">Go home</a>
+                <a class="btn btn-secondary" href="{% url 'event_list' %}">Browse events</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

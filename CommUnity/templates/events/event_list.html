@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Events{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <span class="eyebrow">What's on</span>
+        <h1>Events</h1>
+        <p class="lead">Every approved event across clubs and committees.</p>
+    </div>
+    <div class="row">
+        <a class="btn btn-secondary" href="{% url 'view_calendar' %}"><i class="fa-regular fa-calendar"></i>Calendar view</a>
+        {% if nav_role == 'core_member' and nav_association %}
+            <a class="btn btn-primary" href="{% url 'create_event' %}"><i class="fa-solid fa-plus"></i>Create event</a>
+        {% endif %}
+    </div>
+</div>
+
+<nav class="tabs" aria-label="Upcoming or past">
+    <a class="tab{% if when == 'upcoming' %} active{% endif %}" href="?when=upcoming{% if query %}&amp;q={{ query|urlencode }}{% endif %}{% if category %}&amp;category={{ category }}{% endif %}" {% if when == 'upcoming' %}aria-current="page"{% endif %}>Upcoming</a>
+    <a class="tab{% if when == 'past' %} active{% endif %}" href="?when=past{% if query %}&amp;q={{ query|urlencode }}{% endif %}{% if category %}&amp;category={{ category }}{% endif %}" {% if when == 'past' %}aria-current="page"{% endif %}>Past &amp; reports</a>
+</nav>
+
+<form class="toolbar" method="get" role="search">
+    <input type="hidden" name="when" value="{{ when }}">
+    {% if category %}<input type="hidden" name="category" value="{{ category }}">{% endif %}
+    <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input class="input" type="search" name="q" value="{{ query }}" placeholder="Search events or organisers…" aria-label="Search events">
+    </div>
+    <div class="chips" aria-label="Filter by category">
+        <a class="chip{% if not category %} active{% endif %}" href="?when={{ when }}{% if query %}&amp;q={{ query|urlencode }}{% endif %}">All</a>
+        {% for c in categories %}
+            <a class="chip{% if category == c %} active{% endif %}" href="?when={{ when }}&amp;category={{ c }}{% if query %}&amp;q={{ query|urlencode }}{% endif %}"><span class="cat-dot cat-{{ c|lower }}"></span>{{ c }}</a>
+        {% endfor %}
+    </div>
+</form>
+
+{% if page.object_list %}
+    <div class="grid grid-2">
+        {% for event in page %}{% include "partials/event_card.html" %}{% endfor %}
+    </div>
+    {% if page.has_other_pages %}
+        <nav class="pagination" aria-label="Pages">
+            {% if page.has_previous %}<a class="btn btn-secondary btn-sm" href="?when={{ when }}&amp;q={{ query|urlencode }}&amp;category={{ category }}&amp;page={{ page.previous_page_number }}"><i class="fa-solid fa-arrow-left"></i>Previous</a>{% endif %}
+            <span class="current">Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+            {% if page.has_next %}<a class="btn btn-secondary btn-sm" href="?when={{ when }}&amp;q={{ query|urlencode }}&amp;category={{ category }}&amp;page={{ page.next_page_number }}">Next<i class="fa-solid fa-arrow-right"></i></a>{% endif %}
+        </nav>
+    {% endif %}
+{% else %}
+    <div class="card">
+        {% if when == 'past' %}
+            {% include "partials/empty.html" with icon="fa-clock-rotate-left" text="No past events match your filters." %}
+        {% else %}
+            {% include "partials/empty.html" with icon="fa-calendar" text="No upcoming events match your filters. Follow clubs to hear about new ones first." %}
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

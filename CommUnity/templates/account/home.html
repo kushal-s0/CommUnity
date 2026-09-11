@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Campus life, connected{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
+{% endblock %}
+{% block main_class %}{% endblock %}
+
+{% block main %}
+<section class="hero">
+    <div class="container hero-inner">
+        <div>
+            <span class="eyebrow" style="color:var(--blue-400)">{{ COLLEGE_NAME }} · Clubs &amp; committees</span>
+            <h1>Campus life, <span>connected.</span></h1>
+            <p class="hero-lead">Discover clubs and committees, register for events, and follow every activity on campus — from proposal and faculty approval to the post-event report.</p>
+            <div class="hero-actions">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="btn btn-light btn-lg"><i class="fa-solid fa-gauge"></i>Go to dashboard</a>
+                    <a href="{% url 'event_list' %}" class="btn btn-ghost-light btn-lg">Browse events</a>
+                {% else %}
+                    <a href="{% url 'account_signup' %}" class="btn btn-light btn-lg">Get started</a>
+                    <a href="{% url 'club_list' %}" class="btn btn-ghost-light btn-lg">Explore clubs</a>
+                {% endif %}
+            </div>
+            <div class="hero-stats">
+                <div><strong>{{ stats.clubs }}</strong><span>Clubs</span></div>
+                <div><strong>{{ stats.committees }}</strong><span>Committees</span></div>
+                <div><strong>{{ stats.events }}</strong><span>Upcoming events</span></div>
+                <div><strong>{{ stats.students }}</strong><span>Students</span></div>
+            </div>
+        </div>
+        <a href="https://kjsit.somaiya.edu.in/en" target="_blank" rel="noopener" class="hero-art">
+            <img src="{% static 'images/bodyimg.png' %}" alt="{{ COLLEGE_NAME }} campus">
+        </a>
+    </div>
+</section>
+
+<section class="band">
+    <div class="container">
+        <div class="section-head">
+            <h2>Happening soon</h2>
+            <a href="{% url 'event_list' %}">All events <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        {% if upcoming_events %}
+            <div class="grid grid-2">
+                {% for event in upcoming_events %}{% include "partials/event_card.html" %}{% endfor %}
+            </div>
+        {% else %}
+            <div class="card">{% include "partials/empty.html" with icon="fa-calendar" text="No upcoming events yet. Check back soon!" %}</div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="band band-white">
+    <div class="container">
+        <div class="band-head">
+            <h2>Find where you belong</h2>
+            <p>Explore clubs and committees by what they do.</p>
+        </div>
+        <div class="category-grid">
+            {% for cat in categories %}
+                <article class="category-card card">
+                    <header>
+                        <span class="category-icon"><i class="fa-solid {{ cat.icon }}"></i><span class="cat-dot cat-{{ cat.name|lower }}"></span></span>
+                        <div>
+                            <h3>{{ cat.name }}</h3>
+                            <span class="small muted">{{ cat.associations|length }} group{{ cat.associations|length|pluralize }}</span>
+                        </div>
+                    </header>
+                    <p>{{ cat.blurb }}</p>
+                    {% if cat.associations %}
+                        <div class="chips">
+                            {% for association in cat.associations|slice:":6" %}
+                                <a class="chip" href="{{ association.get_absolute_url }}">{{ association.name }}</a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="band">
+    <div class="container split">
+        <div class="card">
+            <div class="card-head">
+                <h2>Notice board</h2>
+                <a href="{% url 'notice_board' %}" class="small">View all</a>
+            </div>
+            {% for ann in announcements %}
+                <a class="notice" href="{% url 'announcement_details' ann.id %}">
+                    <span class="small muted">{{ ann.club.name }} · {{ ann.created_at|timesince }} ago</span>
+                    <strong>{{ ann.title }}</strong>
+                    <p>{{ ann.message|truncatewords:18 }}</p>
+                </a>
+            {% empty %}
+                {% include "partials/empty.html" with icon="fa-bullhorn" text="No announcements yet." %}
+            {% endfor %}
+        </div>
+        <div class="card calendar-card">
+            <div class="row between" style="margin-bottom:10px">
+                <h2 style="margin:0">Calendar</h2>
+                <a href="{% url 'view_calendar' %}" class="small">Open full calendar</a>
+            </div>
+            <div id="mini-calendar"></div>
+        </div>
+    </div>
+</section>
+
+{% if featured_images %}
+<section class="band band-white">
+    <div class="container">
+        <div class="band-head">
+            <h2>Moments from campus</h2>
+            <p>Recent photos shared by clubs and committees.</p>
+        </div>
+        <div class="gallery-grid">
+            {% for img in featured_images %}
+                <a href="{{ img.image.url }}" data-lightbox data-caption="{{ img.association.name }}">
+                    <img src="{{ img.image.url }}" alt="Photo from {{ img.association.name }}" loading="lazy">
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="band">
+    <div class="container">
+        <div class="cta">
+            <div>
+                <h2>Run a club or committee?</h2>
+                <p>Propose events, get faculty approval, land on the college calendar and publish AI-drafted reports — in one place.</p>
+            </div>
+            {% if nav_role == 'core_member' %}
+                <a class="btn btn-light btn-lg" href="{% url 'dashboard' %}">Open your dashboard</a>
+            {% elif user.is_authenticated %}
+                <a class="btn btn-light btn-lg" href="{% url 'club_list' %}">Find a club to join</a>
+            {% else %}
+                <a class="btn btn-light btn-lg" href="{% url 'account_signup' %}">Create an account</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_body %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var el = document.getElementById('mini-calendar');
+    if (!el || !window.FullCalendar) return;
+    new FullCalendar.Calendar(el, {
+        initialView: 'dayGridMonth',
+        height: 'auto',
+        headerToolbar: { left: 'title', center: '', right: 'prev,next' },
+        dayMaxEvents: 2,
+        eventDisplay: 'block',
+        displayEventTime: false,
+        events: '{% url "get_calendar_events" %}',
+        eventDidMount: function (info) {
+            if (info.event.extendedProps.association) {
+                info.el.title = info.event.title + ' · ' + info.event.extendedProps.association + ' · ' + info.event.extendedProps.location;
+            }
+        }
+    }).render();
+});
+</script>
+{% endblock %}

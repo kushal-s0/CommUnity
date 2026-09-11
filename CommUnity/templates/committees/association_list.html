@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ kind_label }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <span class="eyebrow">Explore</span>
+        <h1>{{ kind_label }}</h1>
+        <p class="lead">
+            {% if kind == 'clubs' %}Student-run clubs for every interest. Follow them with <i class="fa-regular fa-star"></i> to get announcements and event alerts.
+            {% else %}Committees that run the college's flagship events and initiatives. Follow them with <i class="fa-regular fa-star"></i> for updates.{% endif %}
+        </p>
+    </div>
+    {% if nav_role == 'core_member' and not nav_association %}
+        <a class="btn btn-primary" href="{% url 'add_club_committee' %}?type={{ kind }}"><i class="fa-solid fa-plus"></i>Create {% if kind == 'clubs' %}club{% else %}committee{% endif %}</a>
+    {% endif %}
+</div>
+
+<form class="toolbar" method="get" role="search">
+    <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input class="input" type="search" name="q" value="{{ query }}" placeholder="Search {{ kind_label|lower }}…" aria-label="Search {{ kind_label|lower }}">
+    </div>
+    {% if category %}<input type="hidden" name="category" value="{{ category }}">{% endif %}
+    <div class="chips" aria-label="Filter by category">
+        <a class="chip{% if not category %} active{% endif %}" href="?{% if query %}q={{ query|urlencode }}{% endif %}">All</a>
+        {% for c in categories %}
+            <a class="chip{% if category == c %} active{% endif %}" href="?category={{ c }}{% if query %}&amp;q={{ query|urlencode }}{% endif %}"><span class="cat-dot cat-{{ c|lower }}"></span>{{ c }}</a>
+        {% endfor %}
+    </div>
+</form>
+
+{% if associations %}
+    <div class="grid grid-auto">
+        {% for association in associations %}
+            {% include "partials/association_card.html" with show_follow=True %}
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="card">{% include "partials/empty.html" with icon="fa-people-group" text="No matches. Try another search or category." %}</div>
+{% endif %}
+{% endblock %}

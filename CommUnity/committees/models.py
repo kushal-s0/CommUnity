@@ -30,12 +30,27 @@ class Associations(models.Model):
     type = models.CharField(max_length=15, choices=ROLE_CHOICES)
     category = models.CharField(max_length=30, choices=CATEGORY, default='None')
     faculty_incharge = models.ForeignKey('faculty.Faculty', on_delete=models.CASCADE)
-    created_by = models.ForeignKey('members.CoreMember', on_delete=models.CASCADE, null=True, blank=True)  
+    # SET_NULL: a creator losing the core-member role must not delete the association.
+    created_by = models.ForeignKey('members.CoreMember', on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(upload_to='association_images/', null=True, blank=True)
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending')
     owner = models.ForeignKey('members.CoreMember', on_delete=models.SET_NULL, null=True, blank=True,related_name='owned_associations')
-    # edit_request_data = models.JSONField(null=True, blank=True) 
+
+    VISIBLE_STATUSES = ('approved', 'delete_pending')
+
+    @property
+    def is_visible(self):
+        return self.status in self.VISIBLE_STATUSES
+
+    @property
+    def category_label(self):
+        return 'Uncategorised' if self.category == 'None' else self.category
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+
+        return reverse('club_detail' if self.type == 'clubs' else 'committees_detail', args=[self.pk])
 
     def __str__(self):
         return f"{self.name} {self.category}- {self.status}"

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Post announcement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <span class="eyebrow">{{ association.name }}</span>
+        <h1>Post an announcement</h1>
+        <p class="lead">Shown on the notice board and in the notifications of everyone who follows {{ association.name }}.</p>
+    </div>
+</div>
+
+<div class="layout-sidebar">
+    <form method="post" class="card">
+        <div class="card-body">
+            {% csrf_token %}
+            {% include "partials/form_errors.html" %}
+            {% for field in form %}{% include "partials/field.html" %}{% endfor %}
+            <div class="form-actions">
+                <a class="btn btn-ghost" href="{{ association.get_absolute_url }}">Cancel</a>
+                <button class="btn btn-primary" type="submit"><i class="fa-solid fa-bullhorn"></i>Post announcement</button>
+            </div>
+        </div>
+    </form>
+
+    <aside class="card">
+        <div class="card-head"><h3>Recently posted</h3></div>
+        {% for a in recent %}
+            <a class="notice" href="{% url 'announcement_details' a.id %}">
+                <span class="small muted">{{ a.created_at|date:"j M Y" }}</span>
+                <strong>{{ a.title }}</strong>
+            </a>
+        {% empty %}
+            <div class="card-body small muted">Nothing posted yet.</div>
+        {% endfor %}
+    </aside>
+</div>
+{% endblock %}

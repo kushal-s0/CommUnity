@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% load community_tags %}
+{% block title %}Faculty dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="row" style="gap:16px">
+        {% include "partials/avatar.html" with profile=nav_profile size="lg" %}
+        <div>
+            <span class="eyebrow">Faculty{% if faculty.department %} · {{ faculty.department }}{% endif %}</span>
+            <h1>Welcome, {{ nav_profile.display_name }}</h1>
+            <p class="lead">Review requests, keep an eye on upcoming events and collect post-event reports.</p>
+        </div>
+    </div>
+    <div class="row">
+        <a class="btn btn-secondary" href="{% url 'add_core_member' %}"><i class="fa-solid fa-user-plus"></i>Appoint core member</a>
+        <a class="btn btn-primary" href="{% url 'approve_clubs' %}"><i class="fa-solid fa-list-check"></i>Open approvals</a>
+    </div>
+</div>
+
+<div class="stats">
+    {% for stat in stats %}
+        <a class="stat{% if stat.accent and stat.value %} accent{% endif %}" href="{{ stat.url }}">
+            <div class="stat-label">{{ stat.label }}</div>
+            <div class="stat-value">{{ stat.value|compact_number }}</div>
+            <div class="stat-hint">{{ stat.hint }}</div>
+        </a>
+    {% endfor %}
+</div>
+
+<div class="layout-sidebar">
+    <div class="stack">
+        <section class="card">
+            <div class="card-head"><h2>Needs your review</h2><a class="small" href="{% url 'approve_clubs' %}">All requests</a></div>
+            {% if pending_events or pending_associations %}
+                <ul class="list">
+                    {% for e in pending_events %}
+                        <li><a class="list-item" href="{% url 'event_details' e.id %}">
+                            <div class="date-block" aria-hidden="true"><span class="date-month">{{ e.date_time|date:"M" }}</span><span class="date-day">{{ e.date_time|date:"d" }}</span></div>
+                            <div class="list-item-body">
+                                <span class="list-item-title">{{ e.title }}</span>
+                                <span class="small muted">{{ e.association.name }} · {{ e.date_time|date:"g:i A" }} · {{ e.location }}</span>
+                            </div>
+                            <span class="badge badge-pending"><span class="badge-dot"></span>Event</span>
+                        </a></li>
+                    {% endfor %}
+                    {% for a in pending_associations %}
+                        <li><a class="list-item" href="{% url 'approve_clubs' %}?tab={% if a.status == 'delete_pending' %}deletions{% else %}associations{% endif %}">
+                            <span class="avatar avatar-md" aria-hidden="true">{{ a.name|slice:":1"|upper }}</span>
+                            <div class="list-item-body">
+                                <span class="list-item-title">{{ a.name }}</span>
+                                <span class="small muted">{% if a.status == 'delete_pending' %}Deletion request{% else %}New {{ a.get_type_display|slice:":-1"|lower }} request{% endif %}</span>
+                            </div>
+                            <span class="badge badge-{{ a.status }}"><span class="badge-dot"></span>{% if a.status == 'delete_pending' %}Delete{% else %}New{% endif %}</span>
+                        </a></li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                {% include "partials/empty.html" with icon="fa-circle-check" text="You're all caught up — nothing is waiting for review." %}
+            {% endif %}
+        </section>
+
+        <section class="card">
+            <div class="card-head"><h2>Approved events by month</h2><span class="small muted">Last 6 months · {{ chart_total }} total</span></div>
+            <div class="card-body">
+                <figure class="chart" style="--cols: {{ chart|length }}">
+                    <div class="chart-plot" role="img" aria-label="Approved events per month over the last six months. Values are in the table below.">
+                        {% if chart_peak %}<div class="chart-gridline" aria-hidden="true"></div>{% endif %}
+                        {% for m in chart %}
+                            <div class="chart-col" tabindex="0">
+                                <span class="chart-tip">{{ m.full }}: {{ m.count }} event{{ m.count|pluralize }}</span>
+                                {% if m.is_peak %}<span class="chart-value" style="bottom:calc({{ m.pct }}% + 4px)">{{ m.count }}</span>{% endif %}
+                                <div class="chart-bar" style="height:{{ m.pct }}%"></div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="chart-labels" aria-hidden="true">{% for m in chart %}<span>{{ m.label }}</span>{% endfor %}</div>
+                    {% if not chart_peak %}<p class="small muted text-center" style="margin:12px 0 0">No approved events in the last six months.</p>{% endif %}
+                    <details class="table-view" style="margin-top:14px">
+                        <summary>View as table</summary>
+                        <table class="table">
+                            <thead><tr><th>Month</th><th class="num">Approved events</th></tr></thead>
+                            <tbody>{% for m in chart %}<tr><td>{{ m.full }}</td><td class="num">{{ m.count }}</td></tr>{% endfor %}</tbody>
+                        </table>
+                    </details>
+                </figure>
+            </div>
+        </section>
+    </div>
+
+    <aside class="stack">
+        <section class="card">
+            <div class="card-head"><h3>Coming up</h3><a class="small" href="{% url 'view_calendar' %}">Calendar</a></div>
+            <div class="card-body">
+                <div class="event-list">
+                    {% for event in upcoming %}{% include "partials/event_card.html" %}{% empty %}<p class="small muted" style="margin:0">No upcoming events.</p>{% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-head"><h3>Reports due</h3><a class="small" href="{% url 'faculty_reports' %}">All reports</a></div>
+            <ul class="list">
+                {% for e in reports_due %}
+                    <li class="list-item"><div class="list-item-body">
+                        <a class="list-item-title" href="{% url 'event_details' e.id %}">{{ e.title }}</a>
+                        <span class="small muted">{{ e.association.name }} · {{ e.date_time|date:"j M" }}</span>
+                    </div></li>
+                {% empty %}
+                    <li class="list-item small muted">Every completed event has a report.</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        {% if nav_can_lock_dates %}
+            <a class="card card-body card-link row" href="{% url 'manage_faculty_lock_dates' %}" style="flex-wrap:nowrap">
+                <span class="category-icon"><i class="fa-solid fa-lock"></i></span>
+                <div><strong style="color:var(--ink)">Reserve dates</strong><div class="small muted">Block exam and fest days from event bookings.</div></div>
+            </a>
+        {% endif %}
+    </aside>
+</div>
+{% endblock %}

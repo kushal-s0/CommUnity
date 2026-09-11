@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == 'edit' %}Edit {{ association.name }}{% else %}New club or committee{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container-narrow" style="margin:0 auto">
+    {% if mode == 'edit' %}
+        <a class="back-link" href="{{ association.get_absolute_url }}"><i class="fa-solid fa-arrow-left"></i> Back to {{ association.name }}</a>
+    {% endif %}
+    <div class="page-header">
+        <div>
+            <span class="eyebrow">{% if mode == 'edit' %}Edit page{% else %}New request · reviewed by faculty{% endif %}</span>
+            <h1>{% if mode == 'edit' %}Edit {{ association.name }}{% else %}Start a club or committee{% endif %}</h1>
+            <p class="lead">
+                {% if mode == 'create' %}Tell students what you're about. Your faculty in-charge reviews the request, and you can schedule events as soon as it's approved.
+                {% else %}Update your team's public page and gallery.{% endif %}
+            </p>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="card">
+        <div class="card-body">
+            {% csrf_token %}
+            {% include "partials/form_errors.html" %}
+            {% include "partials/field.html" with field=form.name %}
+            <div class="form-grid">
+                {% include "partials/field.html" with field=form.type %}
+                {% include "partials/field.html" with field=form.category %}
+            </div>
+            {% include "partials/field.html" with field=form.description %}
+            {% include "partials/field.html" with field=form.faculty_incharge %}
+            <div class="form-grid">
+                {% include "partials/field.html" with field=form.image %}
+                <div class="field">
+                    <label for="id_images">Add gallery photos</label>
+                    <input type="file" name="images" id="id_images" accept="image/*" multiple>
+                    <p class="help">They appear on your page and in the home page highlights.</p>
+                </div>
+            </div>
+            <div class="form-actions">
+                <a class="btn btn-ghost" href="{% if mode == 'edit' %}{{ association.get_absolute_url }}{% else %}{% url 'dashboard' %}{% endif %}">Cancel</a>
+                <button class="btn btn-primary" type="submit">{% if mode == 'edit' %}Save changes{% else %}Send for approval{% endif %}</button>
+            </div>
+        </div>
+    </form>
+
+    {% if gallery %}
+        <section class="card section">
+            <div class="card-head"><h2>Gallery</h2><span class="small muted">{{ gallery|length }} photo{{ gallery|length|pluralize }}</span></div>
+            <div class="card-body">
+                <div class="gallery-grid">
+                    {% for image in gallery %}
+                        <div class="gallery-item">
+                            <img src="{{ image.image.url }}" alt="">
+                            <form method="post" action="{% url 'delete_association_image' association.pk image.pk %}" data-confirm="Remove this photo from the gallery?">
+                                {% csrf_token %}
+                                <button class="btn btn-sm btn-light" type="submit" aria-label="Remove photo"><i class="fa-solid fa-trash"></i></button>
+                            </form>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    {% endif %}
+</div>
+{% endblock %}

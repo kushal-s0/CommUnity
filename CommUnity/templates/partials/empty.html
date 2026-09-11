@@ -1,0 +1,5 @@
+<div class="empty">
+    <span class="empty-icon"><i class="fa-solid {{ icon|default:'fa-inbox' }}"></i></span>
+    <p>{{ text }}</p>
+    {% if action_url %}<a class="btn btn-secondary btn-sm" href="{{ action_url }}">{{ action_label }}</a>{% endif %}
+</div>

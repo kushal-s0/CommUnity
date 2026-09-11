@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% load community_tags %}
+{% block title %}{{ event.title }}{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{% url 'event_list' %}"><i class="fa-solid fa-arrow-left"></i> All events</a>
+
+<section class="event-banner">
+    {% if event.poster %}<img src="{{ event.poster.url }}" alt="">{% endif %}
+    <div class="event-banner-content">
+        <div class="row">
+            {% include "partials/status_badge.html" %}
+            <span class="chip chip-static" style="background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.2);color:#fff">
+                <span class="cat-dot cat-{{ event.association.category|lower }}"></span>{{ event.association.category_label }}
+            </span>
+        </div>
+        <h1>{{ event.title }}</h1>
+        <p style="margin:0;color:rgba(255,255,255,.85)">by <a href="{{ event.association.get_absolute_url }}">{{ event.association.name }}</a></p>
+    </div>
+</section>
+
+{% if event.status == 'pending' %}
+    <div class="alert alert-warning"><i class="fa-solid fa-hourglass-half"></i><div>
+        <p><strong>Awaiting approval</strong> from {{ event.association.faculty_incharge.id.display_name }}.{% if is_organiser %} You'll be notified as soon as it's reviewed.{% endif %}</p>
+    </div></div>
+{% elif event.status == 'rejected' %}
+    <div class="alert alert-danger"><i class="fa-solid fa-circle-xmark"></i><div>
+        <p><strong>Not approved.</strong>{% if event.remarks %} Remarks: {{ event.remarks }}{% endif %}</p>
+        {% if is_organiser %}<p><a href="{% url 'edit_event' event.id %}">Edit and resubmit <i class="fa-solid fa-arrow-right"></i></a></p>{% endif %}
+    </div></div>
+{% elif event.status == 'cancelled' %}
+    <div class="alert alert-danger"><i class="fa-solid fa-ban"></i><div><p>This event has been cancelled.</p></div></div>
+{% endif %}
+
+{% if is_reviewer and event.status == 'pending' %}
+    <section class="card" style="margin-bottom:24px;border-color:var(--warning-mark)">
+        <div class="card-head"><h2><i class="fa-solid fa-gavel"></i> Review this event</h2></div>
+        <div class="card-body">
+            {% for conflict in conflicts %}
+                <div class="alert alert-danger"><i class="fa-solid fa-circle-exclamation"></i><div><p>{{ conflict }}</p></div></div>
+            {% endfor %}
+            <form method="post" action="{% url 'review_event' event.id %}">
+                {% csrf_token %}
+                <div class="field">
+                    <label for="remarks">Remarks for the organisers <span class="muted">(optional)</span></label>
+                    <textarea name="remarks" id="remarks" rows="3" placeholder="Required changes, conditions, or a note of encouragement"></textarea>
+                </div>
+                <div class="row">
+                    <button class="btn btn-success" name="action" value="approve" type="submit"{% if conflicts %} disabled title="Resolve the venue conflict first"{% endif %}>
+                        <i class="fa-solid fa-check"></i>Approve &amp; add to calendar
+                    </button>
+                    <button class="btn btn-danger" name="action" value="reject" type="submit"><i class="fa-solid fa-xmark"></i>Reject</button>
+                </div>
+            </form>
+        </div>
+    </section>
+{% endif %}
+
+<div class="layout-sidebar">
+    <div class="stack">
+        <section class="card">
+            <div class="card-head"><h2>About this event</h2></div>
+            <div class="card-body prose"><p>{{ event.description }}</p></div>
+        </section>
+
+        {% if event.report_generated and event.status == 'approved' %}
+            <section class="card">
+                <div class="card-head">
+                    <h2><i class="fa-regular fa-file-lines"></i> Post-event report</h2>
+                    <div class="row">
+                        <a class="btn btn-sm btn-secondary" href="{% url 'event_report' event.id %}">Read report</a>
+                        {% if event.report_pdf %}<a class="btn btn-sm btn-primary" href="{{ event.report_pdf.url }}" download><i class="fa-solid fa-download"></i>PDF</a>{% endif %}
+                    </div>
+                </div>
+                <div class="card-body prose">{{ event.report_content|truncatewords:70|markdown }}</div>
+            </section>
+        {% elif can_generate_report %}
+            <section class="card" style="border-color:var(--blue-100)">
+                <div class="card-body row between">
+                    <div>
+                        <h3 style="margin:0">The event is over — time for the report</h3>
+                        <p class="muted small" style="margin:4px 0 0">Answer a few questions and CommUnity drafts a formal report with AI. You can edit it before it's final.</p>
+                    </div>
+                    <a class="btn btn-primary" href="{% url 'generate_event_report' event.id %}"><i class="fa-solid fa-wand-magic-sparkles"></i>Generate report</a>
+                </div>
+            </section>
+        {% endif %}
+
+        {% if is_organiser or is_reviewer %}
+            <section class="card">
+                <div class="card-head"><h2>Activity</h2><span class="small muted">Visible to organisers and faculty</span></div>
+                <div class="card-body">
+                    <ol class="timeline">
+                        {% for log in logs %}
+                            <li>
+                                <span class="timeline-dot tone-{{ log.action }}"></span>
+                                <strong>{{ log.get_action_display }}</strong>
+                                <span class="small muted">{% if log.actor %}{{ log.actor.display_name }} · {% endif %}{{ log.created_at|date:"j M Y, g:i A" }}</span>
+                                {% if log.action == 'report' and log.note %}
+                                    <div class="small muted">Drafted with {{ log.note }}</div>
+                                {% elif log.note %}
+                                    <div class="note">{{ log.note }}</div>
+                                {% endif %}
+                            </li>
+                        {% empty %}
+                            <li><span class="timeline-dot tone-created"></span><strong>Created</strong><span class="small muted">{{ event.created_at|date:"j M Y" }}</span></li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </section>
+        {% endif %}
+
+        {% if more_events %}
+            <section>
+                <div class="section-head"><h2>More from {{ event.association.name }}</h2></div>
+                <div class="event-list">{% for other in more_events %}{% include "partials/event_card.html" with event=other %}{% endfor %}</div>
+            </section>
+        {% endif %}
+    </div>
+
+    <aside class="stack sticky">
+        <section class="card">
+            <div class="card-body">
+                <dl class="meta-list">
+                    <div class="meta-item"><i class="fa-regular fa-calendar"></i><div><dt>Date</dt><dd>{{ event.date_time|date:"l, j F Y" }}</dd></div></div>
+                    <div class="meta-item"><i class="fa-regular fa-clock"></i><div><dt>Time</dt><dd>{{ event.date_time|date:"g:i A" }} – {{ event.end_time|date:"g:i A" }} <span class="muted small">({{ event.duration }} hr{{ event.duration|pluralize }})</span></dd></div></div>
+                    <div class="meta-item"><i class="fa-solid fa-location-dot"></i><div><dt>Venue</dt><dd>{{ event.location }}</dd></div></div>
+                    <div class="meta-item"><i class="fa-solid fa-user-tie"></i><div><dt>Faculty in-charge</dt><dd>{{ event.association.faculty_incharge.id.display_name }}</dd></div></div>
+                    {% if event.status == 'approved' %}
+                        <div class="meta-item"><i class="fa-solid fa-users"></i><div>
+                            <dt>Registered</dt>
+                            <dd>{{ registration_count }}{% if event.max_participants %} / {{ event.max_participants }} seats{% endif %}</dd>
+                            {% if event.max_participants %}<div class="progress" style="margin-top:6px;width:170px"><span style="width:{% widthratio registration_count event.max_participants 100 %}%"></span></div>{% endif %}
+                        </div></div>
+                    {% endif %}
+                </dl>
+            </div>
+
+            {% if event.status == 'approved' %}
+                <div class="card-foot stack-sm">
+                    {% if event.phase == 'upcoming' and can_register_role %}
+                        {% if user.is_authenticated %}
+                            {% if registration %}
+                                <div class="alert alert-success" style="margin:0"><i class="fa-solid fa-circle-check"></i><div><p>You're registered.</p></div></div>
+                                <form method="post" action="{% url 'toggle_registration' event.id %}" data-confirm="Cancel your registration?">
+                                    {% csrf_token %}
+                                    <button class="btn btn-ghost btn-sm btn-block" type="submit">Cancel registration</button>
+                                </form>
+                            {% elif event.can_register %}
+                                <form method="post" action="{% url 'toggle_registration' event.id %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-primary btn-block btn-lg" type="submit"><i class="fa-solid fa-ticket"></i>Register</button>
+                                </form>
+                                {% if event.seats_left is not None %}<p class="small muted text-center" style="margin:0">{{ event.seats_left }} seat{{ event.seats_left|pluralize }} left</p>{% endif %}
+                            {% else %}
+                                <p class="small muted text-center" style="margin:0">{% if event.seats_left == 0 %}This event is full.{% else %}Registration is closed.{% endif %}</p>
+                            {% endif %}
+                        {% else %}
+                            <a class="btn btn-primary btn-block btn-lg" href="{% url 'account_login' %}?next={{ request.path|urlencode }}">Log in to register</a>
+                        {% endif %}
+                    {% elif event.phase == 'ongoing' %}
+                        <span class="badge badge-live" style="align-self:center"><span class="badge-dot"></span>Happening now</span>
+                    {% endif %}
+                    {% if event.phase != 'completed' %}
+                        <div class="row" style="justify-content:center">
+                            <a class="btn btn-secondary btn-sm" href="{{ google_link }}" target="_blank" rel="noopener"><i class="fa-brands fa-google"></i>Add to Google Calendar</a>
+                            <a class="btn btn-ghost btn-sm" href="{% url 'event_ics' event.id %}" title="Download for Outlook / Apple Calendar"><i class="fa-regular fa-calendar-plus"></i>.ics</a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </section>
+
+        {% if is_organiser or is_reviewer %}
+            <section class="card">
+                <div class="card-head"><h3>Manage</h3></div>
+                <div class="card-body stack-sm">
+                    {% if is_organiser and event.status == 'pending' or is_organiser and event.status == 'rejected' %}
+                        <a class="btn btn-secondary btn-block" href="{% url 'edit_event' event.id %}"><i class="fa-solid fa-pen"></i>Edit event</a>
+                    {% endif %}
+                    {% if event.status == 'approved' %}
+                        <a class="btn btn-secondary btn-block" href="{% url 'event_attendees' event.id %}"><i class="fa-solid fa-clipboard-user"></i>Attendees ({{ registration_count }})</a>
+                    {% endif %}
+                    {% if event.google_calendar_event_id %}
+                        <p class="small muted" style="margin:0"><i class="fa-brands fa-google"></i> On the college Google Calendar</p>
+                    {% endif %}
+                    {% if event.status == 'pending' or event.status == 'approved' %}{% if not event.is_completed %}
+                        <form method="post" action="{% url 'cancel_event' event.id %}" class="stack-sm"
+                              data-confirm="Cancel this event? Everyone registered will be notified.">
+                            {% csrf_token %}
+                            <input class="input" name="reason" placeholder="Reason (shared with attendees)" aria-label="Cancellation reason">
+                            <button class="btn btn-danger btn-block" type="submit"><i class="fa-solid fa-ban"></i>Cancel event</button>
+                        </form>
+                    {% endif %}{% endif %}
+                </div>
+            </section>
+        {% endif %}
+    </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+{% url 'club_list' as clubs_url %}
+<div class="page-header">
+    <div>
+        <h1>Notifications</h1>
+        <p class="lead">Approvals, reminders and announcements from the clubs you follow.</p>
+    </div>
+    <form method="post" action="{% url 'mark_all_read' %}">
+        {% csrf_token %}
+        <button class="btn btn-secondary" type="submit"><i class="fa-solid fa-check-double"></i>Mark all as read</button>
+    </form>
+</div>
+
+<div data-tabs>
+    <div class="tabs" role="tablist">
+        <button class="tab" type="button" role="tab" data-tab="updates" aria-controls="panel-updates"
+                aria-selected="{% if tab != 'announcements' %}true{% else %}false{% endif %}">Updates for you</button>
+        <button class="tab" type="button" role="tab" data-tab="announcements" aria-controls="panel-announcements"
+                aria-selected="{% if tab == 'announcements' %}true{% else %}false{% endif %}">Announcements</button>
+    </div>
+</div>
+
+<div id="panel-updates" role="tabpanel" {% if tab == 'announcements' %}hidden{% endif %}>
+    <div class="card">
+        <ul class="list">
+            {% for n in personal %}
+                <li>
+                    <a class="list-item{% if not n.is_read %} unread{% endif %}" href="{% url 'open_notification' n.pk %}">
+                        <span class="notif-icon notif-{{ n.kind }}" aria-hidden="true">
+                            <i class="fa-solid {% if n.kind == 'success' %}fa-circle-check{% elif n.kind == 'danger' %}fa-circle-xmark{% elif n.kind == 'warning' %}fa-hourglass-half{% else %}fa-bell{% endif %}"></i>
+                        </span>
+                        <div class="list-item-body">
+                            <span class="list-item-title">{{ n.title }}</span>
+                            {% if n.message %}<span class="small muted">{{ n.message|truncatechars:160 }}</span>{% endif %}
+                        </div>
+                        <span class="small muted nowrap">{{ n.created_at|timesince }} ago</span>
+                    </a>
+                </li>
+            {% empty %}
+                <li>{% include "partials/empty.html" with icon="fa-bell" text="No notifications yet. You'll hear about approvals and event changes here." %}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<div id="panel-announcements" role="tabpanel" {% if tab != 'announcements' %}hidden{% endif %}>
+    <div class="card">
+        <ul class="list">
+            {% for a in announcements %}
+                <li class="list-item{% if a.is_unread %} unread{% endif %}">
+                    <div class="list-item-body">
+                        <a class="list-item-title" href="{% url 'announcement_details' a.id %}">{{ a.title }}</a>
+                        <span class="small muted">{{ a.club.name }} · {{ a.created_at|date:"j M Y, g:i A" }}</span>
+                        <p class="small" style="margin:4px 0 0">{{ a.message|truncatechars:180 }}</p>
+                    </div>
+                    {% if a.is_unread %}
+                        <form method="post" action="{% url 'mark_as_read' a.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{% url 'notification_view' %}?tab=announcements">
+                            <button class="btn btn-sm btn-ghost" type="submit">Mark read</button>
+                        </form>
+                    {% endif %}
+                </li>
+            {% empty %}
+                <li>{% include "partials/empty.html" with icon="fa-star" text="Follow clubs and committees to see their announcements here." action_url=clubs_url action_label="Discover clubs" %}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

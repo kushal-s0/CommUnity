@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Event reports{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <span class="eyebrow">Documentation</span>
+        <h1>Post-event reports</h1>
+        <p class="lead">Reports submitted by your clubs and committees after each event.</p>
+    </div>
+</div>
+
+{% if due %}
+    <div class="alert alert-warning"><i class="fa-solid fa-hourglass-half"></i><div>
+        <p><strong>{{ due|length }} completed event{{ due|length|pluralize }} without a report:</strong>
+            {% for e in due %}<a href="{% url 'event_details' e.id %}">{{ e.title }}</a> ({{ e.association.name }}){% if not forloop.last %}, {% endif %}{% endfor %}.</p>
+    </div></div>
+{% endif %}
+
+<div class="card">
+    {% if submitted %}
+        <div class="table-wrap">
+            <table class="table">
+                <thead><tr><th>Event</th><th>Organised by</th><th>Held on</th><th>Submitted</th><th><span class="sr-only">Actions</span></th></tr></thead>
+                <tbody>
+                {% for e in submitted %}
+                    <tr>
+                        <td><a class="title-link" href="{% url 'event_report' e.id %}">{{ e.title }}</a></td>
+                        <td>{{ e.association.name }}</td>
+                        <td class="nowrap">{{ e.date_time|date:"j M Y" }}</td>
+                        <td class="nowrap small muted">{{ e.report_generated_at|date:"j M Y" }}</td>
+                        <td class="nowrap">
+                            <a class="btn btn-sm btn-secondary" href="{% url 'event_report' e.id %}">Read</a>
+                            {% if e.report_pdf %}<a class="btn btn-sm btn-ghost" href="{{ e.report_pdf.url }}" download><i class="fa-solid fa-download"></i>PDF</a>{% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        {% include "partials/empty.html" with icon="fa-file-lines" text="No reports submitted yet." %}
+    {% endif %}
+</div>
+{% endblock %}

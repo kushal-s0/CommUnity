@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}My associations{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <span class="eyebrow">Faculty in-charge</span>
+        <h1>My associations</h1>
+        <p class="lead">Clubs and committees you guide. Pending ones are waiting in your approvals.</p>
+    </div>
+</div>
+
+<section>
+    <div class="section-head"><h2>Committees</h2><span class="badge badge-outline">{{ committees|length }}</span></div>
+    {% if committees %}
+        <div class="grid grid-auto">{% for association in committees %}{% include "faculty/_association_tile.html" %}{% endfor %}</div>
+    {% else %}
+        <div class="card">{% include "partials/empty.html" with icon="fa-people-group" text="You're not in charge of any committees yet." %}</div>
+    {% endif %}
+</section>
+
+<section class="section">
+    <div class="section-head"><h2>Clubs</h2><span class="badge badge-outline">{{ clubs|length }}</span></div>
+    {% if clubs %}
+        <div class="grid grid-auto">{% for association in clubs %}{% include "faculty/_association_tile.html" %}{% endfor %}</div>
+    {% else %}
+        <div class="card">{% include "partials/empty.html" with icon="fa-flag" text="You're not in charge of any clubs yet." %}</div>
+    {% endif %}
+</section>
+{% endblock %}

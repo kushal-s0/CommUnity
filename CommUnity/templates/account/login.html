@@ -1,7 +1,33 @@
-{% extends "account/login.html" %}  <!-- Extend the Allauth login template -->
-{% load static %}  <!-- Load static files -->
+{% extends "account/base_entrance.html" %}
+{% load socialaccount %}
+{% block head_title %}Log in{% endblock head_title %}
 
-{% block extra_head %}  <!-- Add your CSS link in the correct block -->
-    <link rel="stylesheet" href="{% static 'css/login.css' %}">
-    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}" class="favicon">
-{% endblock extra_head %}
+{% block content %}
+<span class="eyebrow">Welcome back</span>
+<h1>Log in to CommUnity</h1>
+<p class="lead">Use your college account to manage clubs, events and approvals.</p>
+
+{% get_providers as socialaccount_providers %}
+{% if socialaccount_providers %}
+    {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+    <div class="divider-text">or use e-mail</div>
+{% endif %}
+
+<form method="post" action="{% url 'account_login' %}" novalidate>
+    {% csrf_token %}
+    {% include "partials/form_errors.html" %}
+    {% for field in form %}
+        {% if field.name == 'remember' %}
+            <label class="row" style="gap:8px;font-size:.88rem;font-weight:500;margin-bottom:16px">{{ field }} Remember me</label>
+        {% else %}
+            {% include "partials/field.html" %}
+        {% endif %}
+    {% endfor %}
+    {% if redirect_field_value %}
+        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+    {% endif %}
+    <button type="submit">Log in</button>
+</form>
+
+<p class="auth-foot">New to CommUnity? <a href="{{ signup_url }}">Create an account</a></p>
+{% endblock content %}

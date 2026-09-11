@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Attendees · {{ event.title }}{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{% url 'event_details' event.id %}"><i class="fa-solid fa-arrow-left"></i> Back to event</a>
+<div class="page-header">
+    <div>
+        <span class="eyebrow">Attendees</span>
+        <h1>{{ event.title }}</h1>
+        <p class="lead">{{ registrations|length }} registered{% if event.max_participants %} of {{ event.max_participants }} seats{% endif %} · {{ attended_count }} marked present</p>
+    </div>
+    {% if registrations %}<a class="btn btn-secondary" href="?format=csv"><i class="fa-solid fa-file-csv"></i>Export CSV</a>{% endif %}
+</div>
+
+{% if registrations %}
+    <form method="post" class="card">
+        {% csrf_token %}
+        <div class="card-head">
+            <div class="search-box" style="flex:1;max-width:320px">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input class="input" type="search" placeholder="Filter by name or e-mail" data-filter-input="#attendee-rows" aria-label="Filter attendees">
+            </div>
+            {% if is_organiser %}<label class="row small" style="gap:6px;font-weight:600"><input type="checkbox" id="check-all"> Mark all present</label>{% endif %}
+        </div>
+        <div class="table-wrap">
+            <table class="table">
+                <thead><tr><th>Name</th><th>E-mail</th><th>Registered</th><th>{% if is_organiser %}Present{% else %}Attendance{% endif %}</th></tr></thead>
+                <tbody id="attendee-rows">
+                {% for r in registrations %}
+                    <tr data-filter-item>
+                        <td><div class="person">{% include "partials/avatar.html" with profile=r.participant size="sm" %}<strong>{{ r.participant.display_name }}</strong></div></td>
+                        <td>{{ r.participant.id.email }}</td>
+                        <td class="nowrap">{{ r.registered_at|date:"j M, g:i A" }}</td>
+                        <td>
+                            {% if is_organiser %}
+                                <input type="checkbox" class="attend-box" name="attended" value="{{ r.pk }}" {% if r.attended %}checked{% endif %} aria-label="{{ r.participant.display_name }} attended">
+                            {% elif r.attended %}<span class="badge badge-approved">Present</span>
+                            {% else %}<span class="badge badge-cancelled">—</span>{% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if is_organiser %}
+            <div class="card-foot row between">
+                <span class="small muted">Attendance is used in the post-event report.</span>
+                <button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk"></i>Save attendance</button>
+            </div>
+        {% endif %}
+    </form>
+{% else %}
+    <div class="card">{% include "partials/empty.html" with icon="fa-users" text="No one has registered yet. Share the event page to get sign-ups." %}</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_body %}
+<script>
+var checkAll = document.getElementById('check-all');
+if (checkAll) {
+    checkAll.addEventListener('change', function (event) {
+        document.querySelectorAll('.attend-box').forEach(function (box) {
+            if (!box.closest('tr').hidden) box.checked = event.target.checked;
+        });
+    });
+}
+</script>
+{% endblock %}

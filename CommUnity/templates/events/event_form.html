@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == 'edit' %}Edit {{ event.title }}{% else %}Create event{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container-narrow" style="margin:0 auto">
+    <a class="back-link" href="{% if mode == 'edit' %}{% url 'event_details' event.id %}{% else %}{% url 'dashboard' %}{% endif %}">
+        <i class="fa-solid fa-arrow-left"></i> {% if mode == 'edit' %}Back to event{% else %}Back to dashboard{% endif %}
+    </a>
+    <div class="page-header">
+        <div>
+            <span class="eyebrow">{{ association.name }}</span>
+            <h1>{% if mode == 'edit' %}Edit &amp; resubmit{% else %}Create an event{% endif %}</h1>
+            <p class="lead">{{ association.faculty_incharge.id.display_name }} reviews every event. Once approved it's added to the college calendar and students can register.</p>
+        </div>
+    </div>
+
+    {% if mode == 'edit' and event.status == 'rejected' and event.remarks %}
+        <div class="alert alert-danger"><i class="fa-regular fa-comment"></i><div><p><strong>Faculty remarks:</strong> {{ event.remarks }}</p></div></div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" class="card" id="event-form" novalidate>
+        <div class="card-body">
+            {% csrf_token %}
+            {% include "partials/form_errors.html" %}
+
+            <h3 class="form-section">Basics</h3>
+            {% include "partials/field.html" with field=form.title %}
+            {% include "partials/field.html" with field=form.description %}
+
+            <h3 class="form-section">When &amp; where</h3>
+            <div class="form-grid">
+                {% include "partials/field.html" with field=form.date_time %}
+                {% include "partials/field.html" with field=form.duration %}
+            </div>
+            {% include "partials/field.html" with field=form.location %}
+            <div id="slot-status" class="slot-status" aria-live="polite"></div>
+
+            <h3 class="form-section">Registration &amp; poster</h3>
+            <div class="form-grid">
+                {% include "partials/field.html" with field=form.max_participants %}
+                {% include "partials/field.html" with field=form.poster %}
+            </div>
+            {% include "partials/field.html" with field=form.registration_open %}
+
+            <div class="form-actions">
+                <a class="btn btn-ghost" href="{% if mode == 'edit' %}{% url 'event_details' event.id %}{% else %}{% url 'dashboard' %}{% endif %}">Cancel</a>
+                <button class="btn btn-primary" type="submit"><i class="fa-solid fa-paper-plane"></i>{% if mode == 'edit' %}Save &amp; resubmit{% else %}Submit for approval{% endif %}</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<script>
+(function () {
+    var status = document.getElementById('slot-status');
+    var inputs = ['id_date_time', 'id_duration', 'id_location'].map(function (id) { return document.getElementById(id); });
+    var dateInput = inputs[0];
+    var timer = null;
+
+    if (dateInput) {
+        var now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        dateInput.min = now.toISOString().slice(0, 16);
+    }
+
+    function alertBox(kind, icon, lines) {
+        var box = document.createElement('div');
+        box.className = 'alert alert-' + kind;
+        box.innerHTML = '<i class="fa-solid ' + icon + '"></i><div></div>';
+        lines.forEach(function (text) {
+            var p = document.createElement('p');
+            p.textContent = text;
+            box.lastElementChild.appendChild(p);
+        });
+        return box;
+    }
+
+    async function check() {
+        var values = inputs.map(function (input) { return input && input.value; });
+        if (!values[0] || !values[1] || !values[2]) { status.className = 'slot-status'; return; }
+        var params = new URLSearchParams({ date_time: values[0], duration: values[1], location: values[2]{% if event %}, exclude: '{{ event.id }}'{% endif %} });
+        var response = await fetch('{% url "check_slot" %}?' + params.toString(), { headers: { 'Accept': 'application/json' } });
+        var data = await response.json().catch(function () { return { ok: null }; });
+        if (data.ok === null) { status.className = 'slot-status'; return; }
+        status.innerHTML = '';
+        status.appendChild(data.ok
+            ? alertBox('success', 'fa-circle-check', ['This venue and time are available.'])
+            : alertBox('danger', 'fa-circle-exclamation', data.errors));
+        if (data.warnings && data.warnings.length) {
+            status.appendChild(alertBox('warning', 'fa-triangle-exclamation', data.warnings));
+        }
+        status.className = 'slot-status show';
+    }
+
+    inputs.forEach(function (input) {
+        if (!input) return;
+        input.addEventListener('change', function () { clearTimeout(timer); timer = setTimeout(check, 200); });
+    });
+    check();
+})();
+</script>
+{% endblock %}

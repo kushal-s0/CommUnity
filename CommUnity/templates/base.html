@@ -1,0 +1,178 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Home{% endblock %} · CommUnity</title>
+    <meta name="description" content="CommUnity — clubs, committees and events at {{ COLLEGE_NAME }}, in one place.">
+    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    {% block extra_head %}{% endblock %}
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+    <div class="topbar-inner container">
+        <a class="brand" href="{% url 'home' %}">
+            <img src="{% static 'images/logo.jpeg' %}" alt="" class="brand-logo">
+            <span class="brand-text"><strong>Comm<span>Unity</span></strong><small>{{ COLLEGE_NAME }}</small></span>
+        </a>
+
+        <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="mainnav" data-toggle="nav">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <nav class="mainnav" id="mainnav" aria-label="Main">
+            {% with u=request.resolver_match.url_name %}
+            <div class="nav-links">
+                {% if nav_role == 'faculty' %}
+                    <a href="{% url 'faculty' %}" class="{% if u == 'faculty' %}active{% endif %}">Dashboard</a>
+                    <a href="{% url 'approve_clubs' %}" class="{% if u == 'approve_clubs' %}active{% endif %}">
+                        Approvals{% if pending_approvals %}<span class="nav-count">{{ pending_approvals }}</span>{% endif %}
+                    </a>
+                    <a href="{% url 'faculty_committee' %}" class="{% if u == 'faculty_committee' %}active{% endif %}">My associations</a>
+                    <a href="{% url 'faculty_reports' %}" class="{% if u == 'faculty_reports' %}active{% endif %}">Reports</a>
+                    <a href="{% url 'event_list' %}" class="{% if u == 'event_list' or u == 'event_details' %}active{% endif %}">Events</a>
+                    <a href="{% url 'view_calendar' %}" class="{% if u == 'view_calendar' %}active{% endif %}">Calendar</a>
+                {% else %}
+                    <a href="{% url 'home' %}" class="{% if u == 'home' %}active{% endif %}">Home</a>
+                    <a href="{% url 'club_list' %}" class="{% if u == 'club_list' or u == 'club_detail' %}active{% endif %}">Clubs</a>
+                    <a href="{% url 'committees_list' %}" class="{% if u == 'committees_list' or u == 'committees_detail' %}active{% endif %}">Committees</a>
+                    <a href="{% url 'event_list' %}" class="{% if u == 'event_list' or u == 'event_details' %}active{% endif %}">Events</a>
+                    <a href="{% url 'view_calendar' %}" class="{% if u == 'view_calendar' %}active{% endif %}">Calendar</a>
+                    <a href="{% url 'notice_board' %}" class="{% if u == 'notice_board' or u == 'announcement_details' %}active{% endif %}">Notice board</a>
+                {% endif %}
+            </div>
+            {% endwith %}
+
+            <div class="nav-actions">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'notification_view' %}" class="icon-btn" aria-label="Notifications, {{ unread_notifications|default:0 }} unread" title="Notifications">
+                        <i class="fa-regular fa-bell"></i>
+                        {% if unread_notifications %}<span class="dot-count">{{ unread_notifications }}</span>{% endif %}
+                    </a>
+                    <div class="dropdown">
+                        <button class="avatar-btn" type="button" data-toggle="dropdown" aria-expanded="false" aria-haspopup="true">
+                            {% include "partials/avatar.html" with profile=nav_profile size="sm" %}
+                            <span class="avatar-name">{{ nav_profile.display_name }}</span>
+                            <i class="fa-solid fa-chevron-down caret"></i>
+                        </button>
+                        <div class="dropdown-menu" role="menu">
+                            <div class="dropdown-head">
+                                <strong>{{ nav_profile.display_name }}</strong>
+                                <span>{{ nav_profile.get_role_display }} · {{ user.email }}</span>
+                            </div>
+                            {% if nav_role == 'faculty' %}
+                                <a class="dropdown-item" href="{% url 'faculty' %}"><i class="fa-solid fa-gauge"></i>Dashboard</a>
+                            {% else %}
+                                <a class="dropdown-item" href="{% url 'dashboard' %}"><i class="fa-solid fa-gauge"></i>Dashboard</a>
+                            {% endif %}
+                            <a class="dropdown-item" href="{% url 'getprofile' %}"><i class="fa-regular fa-user"></i>My profile</a>
+                            <a class="dropdown-item" href="{% url 'notification_view' %}"><i class="fa-regular fa-bell"></i>Notifications</a>
+
+                            {% if nav_role == 'core_member' %}
+                                <div class="dropdown-divider"></div>
+                                {% if nav_association %}
+                                    <a class="dropdown-item" href="{{ nav_association.get_absolute_url }}"><i class="fa-solid fa-people-group"></i>{{ nav_association.name|truncatechars:26 }}</a>
+                                    <a class="dropdown-item" href="{% url 'create_event' %}"><i class="fa-regular fa-calendar-plus"></i>Create event</a>
+                                    <a class="dropdown-item" href="{% url 'add_announcement' %}"><i class="fa-solid fa-bullhorn"></i>Post announcement</a>
+                                    <a class="dropdown-item" href="{% url 'add_member' %}"><i class="fa-solid fa-user-plus"></i>Manage team</a>
+                                {% else %}
+                                    <a class="dropdown-item" href="{% url 'add_club_committee' %}"><i class="fa-solid fa-circle-plus"></i>Create club / committee</a>
+                                {% endif %}
+                            {% elif nav_role == 'faculty' %}
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{% url 'approve_clubs' %}"><i class="fa-solid fa-list-check"></i>Approvals</a>
+                                <a class="dropdown-item" href="{% url 'add_core_member' %}"><i class="fa-solid fa-user-plus"></i>Appoint core members</a>
+                                {% if nav_can_lock_dates %}
+                                    <a class="dropdown-item" href="{% url 'manage_faculty_lock_dates' %}"><i class="fa-solid fa-lock"></i>Reserve dates</a>
+                                {% endif %}
+                            {% endif %}
+
+                            {% if user.is_staff %}
+                                <a class="dropdown-item" href="{% url 'admin:index' %}"><i class="fa-solid fa-screwdriver-wrench"></i>Admin site</a>
+                            {% endif %}
+                            <div class="dropdown-divider"></div>
+                            <form method="post" action="{% url 'account_logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item danger"><i class="fa-solid fa-arrow-right-from-bracket"></i>Log out</button>
+                            </form>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{% url 'account_login' %}" class="btn btn-ghost-light">Log in</a>
+                    <a href="{% url 'account_signup' %}" class="btn btn-primary">Sign up</a>
+                {% endif %}
+            </div>
+        </nav>
+    </div>
+</header>
+
+{% if messages %}
+<div class="toast-stack" role="status" aria-live="polite">
+    {% for message in messages %}
+        <div class="toast toast-{{ message.level_tag|default:'info' }}">
+            <i class="fa-solid {% if message.level_tag == 'success' %}fa-circle-check{% elif message.level_tag == 'error' %}fa-circle-exclamation{% elif message.level_tag == 'warning' %}fa-triangle-exclamation{% else %}fa-circle-info{% endif %}"></i>
+            <div class="toast-body">{{ message }}</div>
+            <button type="button" class="toast-close" aria-label="Dismiss">&times;</button>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<main id="main" class="{% block main_class %}page{% endblock %}">
+    {% block main %}
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+    {% endblock %}
+</main>
+
+<footer class="footer">
+    <div class="container footer-grid">
+        <div class="footer-brand">
+            <a class="brand" href="{% url 'home' %}">
+                <img src="{% static 'images/logo.jpeg' %}" alt="" class="brand-logo">
+                <span class="brand-text"><strong>Comm<span>Unity</span></strong><small>{{ COLLEGE_NAME }}</small></span>
+            </a>
+            <p>Every club, committee and event on campus — proposed, approved, scheduled and reported in one place.</p>
+        </div>
+        <div>
+            <h4>Explore</h4>
+            <a href="{% url 'club_list' %}">Clubs</a>
+            <a href="{% url 'committees_list' %}">Committees</a>
+            <a href="{% url 'event_list' %}">Events</a>
+            <a href="{% url 'notice_board' %}">Notice board</a>
+        </div>
+        <div>
+            <h4>Calendar</h4>
+            <a href="{% url 'view_calendar' %}">Event calendar</a>
+            <a href="{% url 'calendar_feed' %}">Subscribe (iCal feed)</a>
+            <a href="{% url 'event_list' %}?when=past">Past events &amp; reports</a>
+        </div>
+        <div>
+            <h4>Contact</h4>
+            <p><i class="fa-solid fa-location-dot"></i> Somaiya Ayurvihar Complex, Sion (East), Mumbai 400 022</p>
+            <p><i class="fa-regular fa-envelope"></i> support@college.edu</p>
+            <p><i class="fa-solid fa-phone"></i> 91-22-44444408</p>
+        </div>
+    </div>
+    <div class="container footer-bottom">
+        <span>© {% now "Y" %} CommUnity · {{ COLLEGE_NAME }}</span>
+        <span class="footer-links">
+            <a href="https://www.somaiya.edu.in/en/privacy-policy" target="_blank" rel="noopener">Privacy</a>
+            <a href="https://www.somaiya.edu.in/en/terms-and-conditions" target="_blank" rel="noopener">Terms</a>
+            <a href="https://www.somaiya.edu.in/en/disclaimer" target="_blank" rel="noopener">Disclaimer</a>
+        </span>
+    </div>
+</footer>
+
+<script src="{% static 'js/app.js' %}"></script>
+{% block extra_body %}{% endblock %}
+</body>
+</html>

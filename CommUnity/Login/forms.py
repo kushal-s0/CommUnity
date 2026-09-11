@@ -1,27 +1,56 @@
+from allauth.account.forms import LoginForm, SignupForm
 from django import forms
-from django.core.exceptions import ValidationError
-from allauth.account.forms import SignupForm, LoginForm
-from django.contrib.auth import get_user_model
+from django.conf import settings
 
-User = get_user_model()
+
+def allowed_domains():
+    return [d.strip().lower().lstrip('@') for d in settings.ALLOWED_EMAIL_DOMAINS if d.strip()]
+
+
+def email_domain_allowed(email):
+    domains = allowed_domains()
+    return not domains or (email or '').lower().rsplit('@', 1)[-1] in domains
+
+
+def domain_error_message():
+    return "Only " + " / ".join(f"@{d}" for d in allowed_domains()) + " e-mail addresses can use CommUnity."
+
 
 class CustomSignUpForm(SignupForm):
-    email = forms.EmailField(required=True)
+    full_name = forms.CharField(max_length=255, label='Full name',
+                                widget=forms.TextInput(attrs={'placeholder': 'Your name', 'autocomplete': 'name'}))
 
-    def clean_email(self):
-        email = self.cleaned_data.get("email")
-        if not email.endswith("@somaiya.edu"):
-            raise ValidationError("Only @somaiya.edu emails are allowed.")
-        if User.objects.filter(email=email).exists():
-            raise ValidationError("An account with this email already exists.")
-        return email
+    field_order = ['full_name', 'email', 'password1', 'password2']
+
+    def save(self, request):
+        user = super().save(request)
+        profile = user.userprofile
+        profile.full_name = self.cleaned_data['full_name']
+        profile.save()
+        return user
+
 
 class CustomLoginForm(LoginForm):
     def clean(self):
         cleaned_data = super().clean()
-        email = cleaned_data.get("login")  # 'login' holds the email in allauth
-
-        if email and not email.endswith("@somaiya.edu"):
-            raise forms.ValidationError("Only @somaiya.edu emails can log in.")
-
+        email = cleaned_data.get('login')  # allauth keeps the e-mail in 'login'
+        if email and not email_domain_allowed(email):
+            raise forms.ValidationError(domain_error_message())
         return cleaned_data
+
+
+class ProfileForm(forms.Form):
+    full_name = forms.CharField(max_length=255, label='Full name')
+    profile_picture = forms.ImageField(required=False, label='Profile picture')
+    department = forms.CharField(max_length=100, required=False)
+    designation = forms.CharField(max_length=100, required=False)
+    position = forms.CharField(max_length=100, required=False, label='Position / role in team',
+                               widget=forms.TextInput(attrs={'placeholder': 'e.g. Technical Head'}))
+
+    def __init__(self, *args, role=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if role != 'faculty':
+            del self.fields['department']
+            del self.fields['designation']
+        if role not in ('core_member', 'member'):
+            del self.fields['position']

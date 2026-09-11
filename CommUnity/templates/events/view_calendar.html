@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Calendar{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <span class="eyebrow">Schedule</span>
+        <h1>Event calendar</h1>
+        <p class="lead">All approved events. Reserved dates (exams, fests) are shaded — no events can be booked on them.</p>
+    </div>
+    <div class="row">
+        <a class="btn btn-secondary" href="{% url 'calendar_feed' %}" title="Add this link in Google Calendar → Other calendars → From URL"><i class="fa-solid fa-rss"></i>Subscribe (iCal)</a>
+        {% if shared_calendar_url %}
+            <a class="btn btn-secondary" href="{{ shared_calendar_url }}" target="_blank" rel="noopener"><i class="fa-brands fa-google"></i>College Google Calendar</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="layout-sidebar">
+    <div class="card calendar-card"><div id="calendar"></div></div>
+
+    <aside class="stack">
+        <section class="card">
+            <div class="card-head"><h3>Legend</h3></div>
+            <div class="card-body">
+                <div class="legend" style="flex-direction:column;align-items:flex-start">
+                    {% for c in categories %}<span><span class="cat-dot cat-{{ c|lower }}"></span>{{ c }}</span>{% endfor %}
+                    <span><span class="swatch-locked"></span>Reserved date</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-head"><h3>Reserved dates</h3></div>
+            <ul class="list">
+                {% for lock in lock_dates %}
+                    <li class="list-item">
+                        <div class="date-block" aria-hidden="true"><span class="date-month">{{ lock.locked_date|date:"M" }}</span><span class="date-day">{{ lock.locked_date|date:"d" }}</span></div>
+                        <div class="list-item-body">
+                            <span class="list-item-title">{{ lock.reason|default:"Reserved" }}</span>
+                            <span class="small muted">{{ lock.locked_date|date:"l, j F" }}</span>
+                        </div>
+                    </li>
+                {% empty %}
+                    <li class="list-item small muted">No upcoming reserved dates.</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section class="card card-body small muted">
+            <strong style="color:var(--ink)">Put it on your phone</strong>
+            <p style="margin:6px 0 0">Copy the <a href="{% url 'calendar_feed' %}">iCal feed link</a> and add it in Google Calendar under <em>Other calendars → From URL</em>. New events show up automatically.</p>
+        </section>
+    </aside>
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var el = document.getElementById('calendar');
+    if (!el || !window.FullCalendar) return;
+    var narrow = window.matchMedia('(max-width: 720px)').matches;
+    new FullCalendar.Calendar(el, {
+        initialView: narrow ? 'listMonth' : 'dayGridMonth',
+        headerToolbar: narrow
+            ? { left: 'prev,next', center: 'title', right: 'today' }
+            : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,listMonth' },
+        buttonText: { today: 'Today', month: 'Month', week: 'Week', list: 'List' },
+        height: 'auto',
+        dayMaxEvents: 3,
+        eventDisplay: 'block',
+        nowIndicator: true,
+        events: '{% url "get_calendar_events" %}',
+        eventContent: function (arg) {
+            if (arg.event.display === 'background' || arg.view.type.indexOf('list') === 0) return;
+            var wrap = document.createElement('div');
+            wrap.className = 'fc-event-inner';
+            var title = document.createElement('strong');
+            title.textContent = (arg.timeText ? arg.timeText + ' · ' : '') + arg.event.title;
+            var meta = document.createElement('span');
+            meta.textContent = arg.event.extendedProps.association + ' · ' + arg.event.extendedProps.location;
+            wrap.append(title, meta);
+            return { domNodes: [wrap] };
+        },
+        eventDidMount: function (info) {
+            var p = info.event.extendedProps;
+            if (p.association) {
+                info.el.title = info.event.title + '\n' + p.association + ' · ' + p.category + '\n' + p.location;
+            }
+        }
+    }).render();
+});
+</script>
+{% endblock %}

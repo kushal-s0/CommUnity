@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Manage team{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <span class="eyebrow">{{ association.name }}</span>
+        <h1>Manage team</h1>
+        <p class="lead">Add students as members{% if is_owner %} or core members{% endif %}. They're notified right away.</p>
+    </div>
+    <a class="btn btn-secondary" href="{{ association.get_absolute_url }}"><i class="fa-solid fa-eye"></i>View public page</a>
+</div>
+
+<div class="layout-sidebar">
+    <div class="stack">
+        <section class="card">
+            <div class="card-head"><h2>Core team</h2><span class="badge badge-outline">{{ core_members|length }}</span></div>
+            <ul class="list">
+                {% for cm in core_members %}
+                    <li class="list-item">
+                        <div class="person" style="flex:1">
+                            {% include "partials/avatar.html" with profile=cm.id size="md" %}
+                            <div class="person-text">
+                                <strong>{{ cm.id.display_name }}</strong>
+                                <span class="small muted">{{ cm.id.id.email }} · {{ cm.position|default:"Core member" }}{% if cm.pk == association.owner_id %} · Owner{% endif %}</span>
+                            </div>
+                        </div>
+                        {% if is_owner and cm.pk != association.owner_id %}
+                            <form method="post" action="{% url 'remove_member' cm.pk %}" data-confirm="Remove {{ cm.id.display_name }} from the core team?">
+                                {% csrf_token %}
+                                <button class="btn btn-ghost btn-sm" type="submit">Remove</button>
+                            </form>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section class="card">
+            <div class="card-head"><h2>Members</h2><span class="badge badge-outline">{{ members|length }}</span></div>
+            <ul class="list">
+                {% for m in members %}
+                    <li class="list-item">
+                        <div class="person" style="flex:1">
+                            {% include "partials/avatar.html" with profile=m.id size="md" %}
+                            <div class="person-text">
+                                <strong>{{ m.id.display_name }}</strong>
+                                <span class="small muted">{{ m.id.id.email }}{% if m.position %} · {{ m.position }}{% endif %}</span>
+                            </div>
+                        </div>
+                        <form method="post" action="{% url 'remove_member' m.pk %}" data-confirm="Remove {{ m.id.display_name }} from {{ association.name }}?">
+                            {% csrf_token %}
+                            <button class="btn btn-ghost btn-sm" type="submit">Remove</button>
+                        </form>
+                    </li>
+                {% empty %}
+                    <li class="list-item small muted">No general members yet. Search for students on the right to add them.</li>
+                {% endfor %}
+            </ul>
+        </section>
+    </div>
+
+    <aside class="card sticky">
+        <div class="card-head"><h3>Add people</h3></div>
+        <div class="card-body">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input class="input" id="people-search" type="search" placeholder="Name or e-mail" autocomplete="off" aria-label="Search students">
+            </div>
+            <div class="search-results" id="people-results" aria-live="polite">
+                <p class="muted small">Type at least 2 characters of a name or e-mail.</p>
+            </div>
+        </div>
+    </aside>
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<script>
+(function () {
+    var isOwner = {{ is_owner|yesno:"true,false" }};
+    var teamName = '{{ association.name|escapejs }}';
+
+    function button(label, className, handler) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn btn-sm ' + className;
+        b.textContent = label;
+        b.addEventListener('click', handler);
+        return b;
+    }
+
+    async function add(student, role) {
+        var label = role === 'core_member' ? 'core member' : 'member';
+        if (!confirm('Add ' + student.name + ' to ' + teamName + ' as a ' + label + '?')) return;
+        var result = await postJSON('{% url "select_member" %}', { student_id: student.id, role: role });
+        showToast(result.data.message || 'Something went wrong.', result.ok ? 'success' : 'error');
+        if (result.ok) setTimeout(function () { location.reload(); }, 900);
+    }
+
+    initPeopleSearch({
+        input: document.getElementById('people-search'),
+        results: document.getElementById('people-results'),
+        searchUrl: '{% url "add_member" %}',
+        renderRow: function (student) {
+            var actions = [];
+            if (student.selectable) {
+                actions.push(button('Member', 'btn-secondary', function () { add(student, 'member'); }));
+                if (isOwner) actions.push(button('Core', 'btn-primary', function () { add(student, 'core_member'); }));
+            }
+            return personRow(student, actions);
+        }
+    });
+})();
+</script>
+{% endblock %}

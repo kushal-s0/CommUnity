@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Edit profile{% endblock %}
+
+{% block content %}
+<div class="container-narrow" style="margin:0 auto">
+    <a class="back-link" href="{% url 'getprofile' %}"><i class="fa-solid fa-arrow-left"></i> Back to profile</a>
+    <div class="page-header">
+        <div>
+            <h1>Edit profile</h1>
+            <p class="lead">How you appear to clubs, committees and faculty.</p>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="card">
+        <div class="card-body">
+            {% csrf_token %}
+            {% include "partials/form_errors.html" %}
+            <div class="row" style="gap:18px;margin-bottom:20px">
+                {% include "partials/avatar.html" with profile=profile size="lg" %}
+                <div>
+                    <strong>{{ profile.display_name }}</strong>
+                    <div class="small muted">{{ profile.get_role_display }} · {{ profile.id.email }}</div>
+                </div>
+            </div>
+            <div class="form-grid">
+                {% for field in form %}{% include "partials/field.html" %}{% endfor %}
+            </div>
+            <div class="form-actions">
+                <a class="btn btn-ghost" href="{% url 'getprofile' %}">Cancel</a>
+                <button class="btn btn-primary" type="submit">Save changes</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Report · {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container-narrow" style="margin:0 auto">
+    <a class="back-link" href="{% url 'event_details' event.id %}"><i class="fa-solid fa-arrow-left"></i> Back to event</a>
+    <div class="page-header">
+        <div>
+            <span class="eyebrow"><i class="fa-solid fa-wand-magic-sparkles"></i> AI-assisted report</span>
+            <h1>Post-event report</h1>
+            <p class="lead">
+                {{ event.title }} · {{ event.date_time|date:"j M Y" }}. Tell us how it went —
+                {% if provider == 'anthropic' %}Claude{% elif provider == 'huggingface' %}the AI model{% else %}CommUnity{% endif %}
+                drafts a formal report that you review and edit before it's final.
+            </p>
+        </div>
+    </div>
+
+    {% if provider == 'template' %}
+        <div class="alert alert-info"><i class="fa-solid fa-circle-info"></i><div>
+            <p>No AI provider is configured, so the draft is assembled from your answers with CommUnity's report template. Add <code>ANTHROPIC_API_KEY</code> to <code>.env</code> to have Claude write it.</p>
+        </div></div>
+    {% endif %}
+    {% if event.report_generated %}
+        <div class="alert alert-warning"><i class="fa-solid fa-rotate"></i><div>
+            <p>Generating again replaces the current report. <a href="{% url 'event_report' event.id %}">View current report</a></p>
+        </div></div>
+    {% endif %}
+
+    <form method="post" class="card" id="report-form">
+        <div class="card-body">
+            {% csrf_token %}
+            {% include "partials/form_errors.html" %}
+            <div class="form-grid">
+                {% include "partials/field.html" with field=form.organizer %}
+                {% include "partials/field.html" with field=form.event_type %}
+                {% include "partials/field.html" with field=form.attendees %}
+                <div class="field">
+                    <label>From CommUnity</label>
+                    <p class="help" style="font-size:.9rem;margin-top:9px"><i class="fa-solid fa-users"></i> {{ registered }} registered · {{ attended }} marked present</p>
+                </div>
+            </div>
+            {% include "partials/field.html" with field=form.speakers %}
+            {% include "partials/field.html" with field=form.agenda %}
+            {% include "partials/field.html" with field=form.highlights %}
+            {% include "partials/field.html" with field=form.outcomes %}
+            {% include "partials/field.html" with field=form.feedback %}
+            {% include "partials/field.html" with field=form.media_links %}
+            <datalist id="event-types">
+                <option value="Workshop"><option value="Seminar"><option value="Guest lecture"><option value="Competition">
+                <option value="Hackathon"><option value="Cultural performance"><option value="Sports tournament">
+                <option value="Social drive"><option value="Webinar"><option value="Industrial visit">
+            </datalist>
+            <div class="form-actions">
+                <span class="small muted"><i class="fa-solid fa-shield-halved"></i> The AI only uses what you enter here.</span>
+                <span class="spacer"></span>
+                <a class="btn btn-ghost" href="{% url 'event_details' event.id %}">Cancel</a>
+                <button class="btn btn-primary" type="submit" id="generate-btn">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>{% if event.report_generated %}Regenerate draft{% else %}Generate draft{% endif %}
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<script>
+document.getElementById('report-form').addEventListener('submit', function () {
+    var button = document.getElementById('generate-btn');
+    setTimeout(function () {
+        button.disabled = true;
+        button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Drafting your report…';
+    }, 0);
+});
+</script>
+{% endblock %}

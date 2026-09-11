@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% block title %}{{ association.name }}{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{% if association.type == 'clubs' %}{% url 'club_list' %}{% else %}{% url 'committees_list' %}{% endif %}">
+    <i class="fa-solid fa-arrow-left"></i> All {{ association.get_type_display|lower }}
+</a>
+
+{% if association.status == 'pending' or association.status == 'rejected' %}
+    <div class="alert alert-{% if association.status == 'rejected' %}danger{% else %}warning{% endif %}">
+        <i class="fa-solid fa-hourglass-half"></i>
+        <div><p>This {{ association.get_type_display|slice:":-1"|lower }} is <strong>{{ association.get_status_display|lower }}</strong>. Only its team and faculty in-charge can see this page.</p></div>
+    </div>
+{% elif association.status == 'delete_pending' and is_team %}
+    <div class="alert alert-danger"><i class="fa-solid fa-trash"></i><div><p>A deletion request is waiting for the faculty in-charge.</p></div></div>
+{% endif %}
+
+<section class="assoc-hero">
+    {% if association.image %}<img src="{{ association.image.url }}" alt="">{% endif %}
+    <div class="assoc-hero-inner">
+        <div>
+            <div class="row">
+                <span class="chip chip-static"><span class="cat-dot cat-{{ association.category|lower }}"></span>{{ association.category_label }}</span>
+                <span class="chip chip-static">{{ association.get_type_display|slice:":-1" }}</span>
+            </div>
+            <h1>{{ association.name }}</h1>
+            <p><i class="fa-solid fa-user-tie"></i> Faculty in-charge: {{ association.faculty_incharge.id.display_name }}</p>
+        </div>
+        <div class="row">
+            {% if association.is_visible %}
+                <button type="button" class="btn btn-light follow-btn{% if is_following %} is-following{% endif %}"
+                        data-follow="{% url 'toggle_follow' association.pk %}" aria-pressed="{{ is_following|yesno:'true,false' }}">
+                    <i class="{% if is_following %}fa-solid{% else %}fa-regular{% endif %} fa-star"></i>
+                    <span class="follow-label">{% if is_following %}Following{% else %}Follow{% endif %}</span>
+                </button>
+            {% endif %}
+            {% if is_team %}
+                <a class="btn btn-ghost-light" href="{% url 'edit_club_committee' association.pk %}"><i class="fa-solid fa-pen"></i>Edit page</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<div class="layout-sidebar">
+    <div class="stack">
+        <section class="card">
+            <div class="card-head"><h2>About</h2></div>
+            <div class="card-body prose"><p>{{ association.description }}</p></div>
+        </section>
+
+        <section class="card">
+            <div class="card-head">
+                <h2>Upcoming events</h2>
+                {% if is_team and association.is_visible %}
+                    <a class="btn btn-sm btn-primary" href="{% url 'create_event' %}"><i class="fa-solid fa-plus"></i>New event</a>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if upcoming_events %}
+                    <div class="event-list">{% for event in upcoming_events %}{% include "partials/event_card.html" %}{% endfor %}</div>
+                {% else %}
+                    <p class="muted" style="margin:0">No upcoming events right now.{% if not is_following and association.is_visible %} Follow to hear about the next one.{% endif %}</p>
+                {% endif %}
+            </div>
+        </section>
+
+        {% if past_events %}
+            <section class="card">
+                <div class="card-head"><h2>Past events</h2></div>
+                <ul class="list">
+                    {% for e in past_events %}
+                        <li class="list-item">
+                            <div class="date-block" aria-hidden="true"><span class="date-month">{{ e.date_time|date:"M" }}</span><span class="date-day">{{ e.date_time|date:"d" }}</span></div>
+                            <div class="list-item-body">
+                                <a class="list-item-title" href="{% url 'event_details' e.id %}">{{ e.title }}</a>
+                                <span class="small muted">{{ e.date_time|date:"j M Y" }} · {{ e.location }}</span>
+                            </div>
+                            {% if e.report_generated %}
+                                <a class="btn btn-sm btn-secondary" href="{% url 'event_report' e.id %}"><i class="fa-regular fa-file-lines"></i>Report</a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+
+        {% if association.images.exists %}
+            <section class="card">
+                <div class="card-head"><h2>Gallery</h2></div>
+                <div class="card-body">
+                    <div class="gallery-grid">
+                        {% for image in association.images.all %}
+                            <a href="{{ image.image.url }}" data-lightbox data-caption="{{ association.name }}">
+                                <img src="{{ image.image.url }}" alt="Photo from {{ association.name }}" loading="lazy">
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+        {% endif %}
+    </div>
+
+    <aside class="stack">
+        {% if announcements or is_team %}
+            <section class="card">
+                <div class="card-head">
+                    <h3>Announcements</h3>
+                    {% if is_team %}<a class="small" href="{% url 'add_announcement' %}"><i class="fa-solid fa-plus"></i> Post</a>{% endif %}
+                </div>
+                {% for a in announcements %}
+                    <a class="notice" href="{% url 'announcement_details' a.id %}">
+                        <span class="small muted">{{ a.created_at|date:"j M Y" }}</span>
+                        <strong>{{ a.title }}</strong>
+                    </a>
+                {% empty %}
+                    <div class="card-body small muted">No announcements yet.</div>
+                {% endfor %}
+            </section>
+        {% endif %}
+
+        <section class="card">
+            <div class="card-head">
+                <h3>Team</h3>
+                {% if is_team %}
+                    <a class="small" href="{% url 'add_member' %}">Manage</a>
+                {% elif is_faculty %}
+                    <a class="small" href="{% if association.type == 'clubs' %}{% url 'club_member' association.pk %}{% else %}{% url 'committee_member' association.pk %}{% endif %}">All members</a>
+                {% endif %}
+            </div>
+            <ul class="list">
+                <li class="list-item">
+                    <div class="person">
+                        {% include "partials/avatar.html" with profile=association.faculty_incharge.id size="md" %}
+                        <div class="person-text"><strong>{{ association.faculty_incharge.id.display_name }}</strong><span class="small muted">Faculty in-charge</span></div>
+                    </div>
+                </li>
+                {% for cm in core_members %}
+                    <li class="list-item">
+                        <div class="person">
+                            {% include "partials/avatar.html" with profile=cm.id size="md" %}
+                            <div class="person-text">
+                                <strong>{{ cm.id.display_name }}</strong>
+                                <span class="small muted">{{ cm.position|default:"Core member" }}{% if cm.pk == association.owner_id %} · Owner{% endif %}</span>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+            {% if members %}<div class="card-foot small muted">+ {{ members|length }} general member{{ members|length|pluralize }}</div>{% endif %}
+        </section>
+
+        {% if is_owner %}
+            <section class="card">
+                <div class="card-head"><h3>Owner tools</h3></div>
+                <div class="card-body stack">
+                    {% if transfer_candidates %}
+                        <form method="post" action="{% url 'transfer_ownership' association.pk %}" class="stack-sm"
+                              data-confirm="Transfer ownership? You'll stay on the team as a core member.">
+                            {% csrf_token %}
+                            <div class="field" style="margin:0">
+                                <label for="new_owner">Transfer ownership to</label>
+                                <select name="new_owner" id="new_owner" required>
+                                    {% for cm in transfer_candidates %}<option value="{{ cm.pk }}">{{ cm.id.display_name }}</option>{% endfor %}
+                                </select>
+                            </div>
+                            <button class="btn btn-secondary btn-sm" type="submit">Transfer ownership</button>
+                        </form>
+                    {% else %}
+                        <p class="small muted" style="margin:0">Add another core member to be able to transfer ownership.</p>
+                    {% endif %}
+                    {% if association.status != 'delete_pending' %}
+                        <a class="btn btn-danger btn-sm" href="{% url 'delete_club_committee' association.pk %}"><i class="fa-solid fa-trash"></i>Request deletion</a>
+                    {% endif %}
+                </div>
+            </section>
+        {% endif %}
+    </aside>
+</div>
+{% endblock %}

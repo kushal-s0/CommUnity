@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Members · {{ association.name }}{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{{ association.get_absolute_url }}"><i class="fa-solid fa-arrow-left"></i> {{ association.name }}</a>
+<div class="page-header">
+    <div>
+        <span class="eyebrow">Team</span>
+        <h1>Meet the team</h1>
+        <p class="lead">{{ core_members|length }} core member{{ core_members|length|pluralize }} and {{ members|length }} general member{{ members|length|pluralize }} in {{ association.name }}.</p>
+    </div>
+</div>
+
+<section>
+    <div class="section-head"><h2>Core team</h2></div>
+    {% if core_members %}
+        <div class="team-grid">
+            {% for cm in core_members %}
+                <div class="card team-card">
+                    {% include "partials/avatar.html" with profile=cm.id size="lg" %}
+                    <strong>{{ cm.id.display_name }}</strong>
+                    <span class="small muted">{{ cm.position|default:"Core member" }}</span>
+                    <div><a class="small" href="mailto:{{ cm.id.id.email }}">{{ cm.id.id.email }}</a></div>
+                    {% if cm.pk == association.owner_id %}<span class="badge badge-info">Owner</span>{% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card">{% include "partials/empty.html" with icon="fa-user-group" text="No core members yet." %}</div>
+    {% endif %}
+</section>
+
+<section class="section">
+    <div class="section-head"><h2>Members</h2></div>
+    <div class="card">
+        {% if members %}
+            <div class="table-wrap">
+                <table class="table">
+                    <thead><tr><th>Name</th><th>E-mail</th><th>Position</th><th>Joined</th></tr></thead>
+                    <tbody>
+                    {% for m in members %}
+                        <tr>
+                            <td><div class="person">{% include "partials/avatar.html" with profile=m.id size="sm" %}<strong>{{ m.id.display_name }}</strong></div></td>
+                            <td><a href="mailto:{{ m.id.id.email }}">{{ m.id.id.email }}</a></td>
+                            <td>{{ m.position|default:"—" }}</td>
+                            <td class="nowrap">{{ m.joined_at|date:"j M Y" }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            {% include "partials/empty.html" with icon="fa-users" text="No general members yet." %}
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

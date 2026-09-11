@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% comment %}
+Every allauth page (login, signup, password reset, e-mail confirmation…) renders
+inside the site layout as a centred card.
+{% endcomment %}
+{% block title %}{% block head_title %}Account{% endblock head_title %}{% endblock title %}
+{% block body_class %}auth-page{% endblock %}
+{% block main_class %}{% endblock %}
+{% block main %}
+<div class="auth-wrap">
+    <div class="auth-card">
+        {% block content %}{% endblock content %}
+    </div>
+</div>
+{% endblock main %}

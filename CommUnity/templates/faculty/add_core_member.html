@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Appoint core members{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <span class="eyebrow">Team leadership</span>
+        <h1>Appoint core members</h1>
+        <p class="lead">Core members create clubs and committees, schedule events and write reports. Assign them to one of your teams, or let them create a new one.</p>
+    </div>
+</div>
+
+<div class="layout-sidebar">
+    <section class="card">
+        <div class="card-head">
+            <h2>Core members</h2>
+            <div class="search-box" style="width:240px">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input class="input" type="search" placeholder="Filter" data-filter-input="#core-list" aria-label="Filter core members">
+            </div>
+        </div>
+        <ul class="list" id="core-list">
+            {% for cm in core_members %}
+                <li class="list-item" data-filter-item>
+                    <div class="person" style="flex:1">
+                        {% include "partials/avatar.html" with profile=cm.id size="md" %}
+                        <div class="person-text"><strong>{{ cm.id.display_name }}</strong><span class="small muted">{{ cm.id.id.email }}</span></div>
+                    </div>
+                    {% if cm.association %}
+                        <a class="chip chip-static" href="{{ cm.association.get_absolute_url }}"><span class="cat-dot cat-{{ cm.association.category|lower }}"></span>{{ cm.association.name }}</a>
+                    {% else %}
+                        <span class="badge badge-pending">No team yet</span>
+                    {% endif %}
+                </li>
+            {% empty %}
+                <li>{% include "partials/empty.html" with icon="fa-user-group" text="No core members in your teams yet. Search for a student to appoint one." %}</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <aside class="card sticky">
+        <div class="card-head"><h3>Find a student</h3></div>
+        <div class="card-body">
+            <div class="field">
+                <label for="assign-to">Assign to</label>
+                <select id="assign-to">
+                    <option value="">No team — they'll create one</option>
+                    {% for a in associations %}<option value="{{ a.pk }}">{{ a.name }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input class="input" id="student-search" type="search" placeholder="Name or e-mail" autocomplete="off" aria-label="Search students">
+            </div>
+            <div class="search-results" id="student-results" aria-live="polite">
+                <p class="muted small">Type at least 2 characters of a name or e-mail.</p>
+            </div>
+        </div>
+    </aside>
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<script>
+(function () {
+    var assign = document.getElementById('assign-to');
+    initPeopleSearch({
+        input: document.getElementById('student-search'),
+        results: document.getElementById('student-results'),
+        searchUrl: '{% url "add_core_member" %}',
+        renderRow: function (student) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'btn btn-sm btn-primary';
+            b.textContent = 'Appoint';
+            b.addEventListener('click', async function () {
+                var team = assign.value ? ' of ' + assign.options[assign.selectedIndex].text : '';
+                if (!confirm('Make ' + student.name + ' a core member' + team + '?')) return;
+                var result = await postJSON('{% url "select_student" %}', { student_id: student.id, association_id: assign.value || null });
+                showToast(result.data.message || 'Something went wrong.', result.ok ? 'success' : 'error');
+                if (result.ok) setTimeout(function () { location.reload(); }, 900);
+            });
+            return personRow(student, [b]);
+        }
+    });
+})();
+</script>
+{% endblock %}

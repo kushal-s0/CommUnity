@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% load community_tags %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+{% url 'create_event' as create_url %}
+{% url 'event_list' as events_url %}
+
+<div class="page-header">
+    <div class="row" style="gap:16px">
+        {% include "partials/avatar.html" with profile=profile size="lg" %}
+        <div>
+            <span class="eyebrow">{{ profile.get_role_display }}</span>
+            <h1>Hi, {{ profile.display_name }}</h1>
+            <p class="lead">{% if association %}Here's what's happening with {{ association.name }}.{% else %}Here's what's coming up for you.{% endif %}</p>
+        </div>
+    </div>
+    {% if association and association.is_visible %}
+        <div class="row">
+            <a class="btn btn-secondary" href="{% url 'add_announcement' %}"><i class="fa-solid fa-bullhorn"></i>Announce</a>
+            <a class="btn btn-primary" href="{{ create_url }}"><i class="fa-regular fa-calendar-plus"></i>Create event</a>
+        </div>
+    {% endif %}
+</div>
+
+{% if profile.role == 'core_member' and not association %}
+    <div class="card card-body stack" style="align-items:flex-start;margin-bottom:28px">
+        <span class="eyebrow">Get started</span>
+        <h2 style="margin:0">Create your club or committee</h2>
+        <p class="muted" style="margin:0">You're a core member but not part of a team yet. Create one and your chosen faculty in-charge will review it — or ask an existing team's owner to add you.</p>
+        <a class="btn btn-primary" href="{% url 'add_club_committee' %}"><i class="fa-solid fa-circle-plus"></i>Create club / committee</a>
+    </div>
+{% endif %}
+
+{% if association and not association.is_visible %}
+    <div class="alert alert-{% if association.status == 'rejected' %}danger{% else %}warning{% endif %}">
+        <i class="fa-solid fa-hourglass-half"></i>
+        <div>
+            <p><strong>{{ association.name }}</strong> is {{ association.get_status_display|lower }}.</p>
+            <p>{% if association.status == 'pending' %}{{ association.faculty_incharge.id.display_name }} will review it. You can schedule events once it's approved.{% else %}Update the details and talk to your faculty in-charge.{% endif %}</p>
+        </div>
+    </div>
+{% endif %}
+
+{% if stats %}
+    <div class="stats">
+        {% for stat in stats %}
+            <div class="stat{% if stat.accent %} accent{% endif %}">
+                <div class="stat-label">{{ stat.label }}</div>
+                <div class="stat-value">{{ stat.value|compact_number }}</div>
+                <div class="stat-hint">{{ stat.hint }}</div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% if reports_due %}
+    <div class="alert alert-info">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <div>
+            <p><strong>{{ reports_due|length }} completed event{{ reports_due|length|pluralize }} need{{ reports_due|length|pluralize:"s," }} a post-event report.</strong> Answer a few questions and CommUnity drafts it with AI.</p>
+            <p>{% for e in reports_due %}<a href="{% url 'generate_event_report' e.id %}">{{ e.title }}</a>{% if not forloop.last %} · {% endif %}{% endfor %}</p>
+        </div>
+    </div>
+{% endif %}
+
+<div class="layout-sidebar">
+    <div class="stack">
+        {% if association %}
+            <section class="card">
+                <div class="card-head">
+                    <h2>{{ association.name }} events</h2>
+                    {% if association.is_visible %}<a class="small" href="{{ create_url }}"><i class="fa-solid fa-plus"></i> New event</a>{% endif %}
+                </div>
+                {% if team_events %}
+                    <div class="table-wrap">
+                        <table class="table">
+                            <thead><tr><th>Event</th><th>When</th><th>Status</th><th class="num">Registered</th><th><span class="sr-only">Actions</span></th></tr></thead>
+                            <tbody>
+                            {% for e in team_events %}
+                                <tr>
+                                    <td>
+                                        <a class="title-link" href="{% url 'event_details' e.id %}">{{ e.title }}</a>
+                                        <div class="small muted">{{ e.location }}</div>
+                                    </td>
+                                    <td class="nowrap">{{ e.date_time|date:"j M Y, g:i A" }}</td>
+                                    <td>{% include "partials/status_badge.html" with event=e %}</td>
+                                    <td class="num">{{ e.reg_count }}</td>
+                                    <td class="nowrap">
+                                        {% if e.status == 'approved' and e.is_completed %}
+                                            {% if e.report_generated %}
+                                                <a href="{% url 'event_report' e.id %}" class="btn btn-sm btn-secondary">Report</a>
+                                            {% else %}
+                                                <a href="{% url 'generate_event_report' e.id %}" class="btn btn-sm btn-primary">Write report</a>
+                                            {% endif %}
+                                        {% elif e.status == 'rejected' or e.status == 'pending' %}
+                                            <a href="{% url 'edit_event' e.id %}" class="btn btn-sm btn-secondary">Edit</a>
+                                        {% elif e.status == 'approved' %}
+                                            <a href="{% url 'event_attendees' e.id %}" class="btn btn-sm btn-ghost">Attendees</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% elif association.is_visible %}
+                    {% include "partials/empty.html" with icon="fa-calendar-plus" text="No events yet. Plan your first one — once your faculty in-charge approves it, it lands on the college calendar." action_url=create_url action_label="Create event" %}
+                {% else %}
+                    {% include "partials/empty.html" with icon="fa-hourglass-half" text="You can create events once your team is approved." %}
+                {% endif %}
+            </section>
+        {% endif %}
+
+        <section class="card">
+            <div class="card-head">
+                <h2>Your registrations</h2>
+                <a href="{{ events_url }}" class="small">Find events</a>
+            </div>
+            <div class="card-body">
+                {% if my_events %}
+                    <div class="event-list">{% for event in my_events %}{% include "partials/event_card.html" %}{% endfor %}</div>
+                {% else %}
+                    {% include "partials/empty.html" with icon="fa-ticket" text="You haven't registered for any upcoming events." action_url=events_url action_label="Browse events" %}
+                {% endif %}
+            </div>
+        </section>
+
+        {% if suggested %}
+            <section class="card">
+                <div class="card-head"><h2>From clubs you follow</h2></div>
+                <div class="card-body">
+                    <div class="event-list">{% for event in suggested %}{% include "partials/event_card.html" %}{% endfor %}</div>
+                </div>
+            </section>
+        {% endif %}
+    </div>
+
+    <aside class="stack">
+        <section class="card">
+            <div class="card-head"><h3>Notifications</h3><a href="{% url 'notification_view' %}" class="small">See all</a></div>
+            <ul class="list">
+                {% for n in notifications %}
+                    <li>
+                        <a class="list-item{% if not n.is_read %} unread{% endif %}" href="{% url 'open_notification' n.pk %}">
+                            <div class="list-item-body">
+                                <span class="list-item-title">{{ n.title }}</span>
+                                <span class="small muted">{{ n.created_at|timesince }} ago</span>
+                            </div>
+                        </a>
+                    </li>
+                {% empty %}
+                    <li class="list-item muted small">Nothing new.</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section class="card">
+            <div class="card-head"><h3>Following</h3><a href="{% url 'club_list' %}" class="small">Discover</a></div>
+            <ul class="list">
+                {% for a in followed %}
+                    <li>
+                        <a class="list-item" href="{{ a.get_absolute_url }}">
+                            <span class="cat-dot cat-{{ a.category|lower }}"></span>
+                            <div class="list-item-body">
+                                <span class="list-item-title">{{ a.name }}</span>
+                                <span class="small muted">{{ a.get_type_display|slice:":-1" }} · {{ a.category_label }}</span>
+                            </div>
+                        </a>
+                    </li>
+                {% empty %}
+                    <li class="list-item muted small">Follow clubs and committees to get their announcements and event alerts.</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        {% if member_associations %}
+            <section class="card">
+                <div class="card-head"><h3>Your teams</h3></div>
+                <ul class="list">
+                    {% for a in member_associations %}
+                        <li><a class="list-item" href="{{ a.get_absolute_url }}"><div class="list-item-body"><span class="list-item-title">{{ a.name }}</span></div></a></li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+    </aside>
+</div>
+{% endblock %}

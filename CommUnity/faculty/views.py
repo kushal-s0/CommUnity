@@ -1,268 +1,324 @@
-from django.shortcuts import render,get_object_or_404,redirect
-from faculty.models import Faculty
-from committees.models import Associations
-from Login.models import UserProfile
-from members.models import CoreMember, Member
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 import json
-from events.models import Event
+from datetime import date, timedelta
+
+from django.contrib import messages
 from django.db.models import Q
-from events.google_calendar import create_google_calendar_event
-from django.contrib.auth import get_user_model
-from events.models import FacultyLockDate
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+
+from committees.models import Associations
+from events.models import Event, EventLog, FacultyLockDate
+from events.services import describe_conflict, find_conflicts, locked_date_for, review_event
+from Login.models import UserProfile
+from Login.notify import notify
+from Login.permissions import CORE_MEMBER, FACULTY, STUDENT, MEMBER, faculty_required, get_faculty, get_profile
+from members.models import CoreMember, Member
+
 from .forms import FacultyLockDateForm
-User = get_user_model()
 
-# Create your views here.
+VISIBLE = Associations.VISIBLE_STATUSES
 
+
+def _events_per_month(events, months=6):
+    """Counts of approved events for the last `months` calendar months, oldest first."""
+    today = timezone.localdate()
+    keys, year, month = [], today.year, today.month
+    for _ in range(months):
+        keys.append((year, month))
+        month -= 1
+        if month == 0:
+            year, month = year - 1, 12
+    counts = {key: 0 for key in reversed(keys)}
+    for event in events:
+        local = timezone.localtime(event.date_time)
+        if (local.year, local.month) in counts:
+            counts[(local.year, local.month)] += 1
+    peak = max(counts.values())
+    return [
+        {
+            'label': date(y, m, 1).strftime('%b'),
+            'full': date(y, m, 1).strftime('%B %Y'),
+            'count': count,
+            'pct': round(count / peak * 100) if peak else 0,
+            'is_peak': peak > 0 and count == peak,
+        }
+        for (y, m), count in counts.items()
+    ], peak
+
+
+@faculty_required
 def faculty_view(request):
-    active_user = request.user
-    user = get_object_or_404(User, username=active_user.username)
-    print(user.email)
-    user_profile = get_object_or_404(UserProfile, id=user)
-    faculty = Faculty.objects.get(id=user_profile)
-    context = {'user': user,'user_profile': user_profile,'faculty': faculty}
-    return render(request, 'faculty.html',context)
-
-def profile_view(request):   
-    active_user = request.user
-    user = get_object_or_404(User, username=active_user.username)
-    print(user.email)
-    user_profile = get_object_or_404(UserProfile, id=user)
-    faculty = Faculty.objects.get(id=user_profile)
+    faculty = get_faculty(request.user)
     associations = Associations.objects.filter(faculty_incharge=faculty)
-    print(associations)
-    context = {'user': user,'user_profile': user_profile,'faculty': faculty,'associations': associations}
-    return render(request, 'profile.html', context)
+    events = Event.objects.filter(association__faculty_incharge=faculty).select_related('association', 'location')
+    approved = list(events.filter(status='approved'))
+    upcoming = sorted([e for e in approved if not e.is_completed], key=lambda e: e.date_time)
+    completed = sorted([e for e in approved if e.is_completed], key=lambda e: e.date_time, reverse=True)
+    reports_due = [e for e in completed if not e.report_generated]
+    pending_events = list(events.filter(status='pending').order_by('date_time'))
+    pending_associations = list(associations.filter(status__in=['pending', 'delete_pending']))
+    chart, chart_peak = _events_per_month(approved)
+
+    stats = [
+        {'label': 'Awaiting your review', 'value': len(pending_events) + len(pending_associations),
+         'hint': 'events and club requests', 'url': reverse('approve_clubs'), 'accent': True},
+        {'label': 'Upcoming events', 'value': len(upcoming), 'hint': 'approved and scheduled',
+         'url': reverse('view_calendar')},
+        {'label': 'Clubs and committees', 'value': associations.filter(status__in=VISIBLE).count(),
+         'hint': 'under your guidance', 'url': reverse('faculty_committee')},
+        {'label': 'Reports submitted', 'value': len(completed) - len(reports_due),
+         'hint': f"{len(reports_due)} still due" if reports_due else 'all caught up', 'url': reverse('faculty_reports')},
+    ]
+    return render(request, 'faculty/dashboard.html', {
+        'faculty': faculty,
+        'stats': stats,
+        'pending_events': pending_events[:5],
+        'pending_associations': pending_associations[:5],
+        'upcoming': upcoming[:5],
+        'reports_due': reports_due[:5],
+        'chart': chart,
+        'chart_peak': chart_peak,
+        'chart_total': sum(row['count'] for row in chart),
+    })
+
+
+@faculty_required
+def profile_view(request):
+    return redirect('getprofile')
+
+
+@faculty_required
+def faculty_committee(request):
+    faculty = get_faculty(request.user)
+    associations = Associations.objects.filter(faculty_incharge=faculty).order_by('name')
+    return render(request, 'faculty/associations.html', {
+        'clubs': [a for a in associations if a.type == 'clubs'],
+        'committees': [a for a in associations if a.type == 'committees'],
+    })
+
+
+def _association_members(request, pk):
+    association = get_object_or_404(Associations.objects.select_related('faculty_incharge__id'), pk=pk)
+    profile = get_profile(request.user)
+    allowed = request.user.is_staff or (profile is not None and (
+        association.faculty_incharge_id == profile.pk
+        or CoreMember.objects.filter(id=profile, association=association).exists()
+    ))
+    if not allowed:
+        messages.error(request, "You don't have access to this team's member list.")
+        return redirect(association.get_absolute_url())
+    return render(request, 'faculty/association_members.html', {
+        'association': association,
+        'core_members': CoreMember.objects.filter(association=association).select_related('id__id'),
+        'members': [m for m in Member.objects.select_related('id__id') if pk in m.association_ids],
+    })
+
 
 def committee_member_view(request, pk):
-    committee = get_object_or_404(Associations, pk=pk)
+    return _association_members(request, pk)
 
-    # Fetch all members and filter manually
-    all_members = Member.objects.all()
-    members = [member for member in all_members if pk in member.association]  # Assuming association is a list
-
-    # Fetch core members normally
-    core_members = CoreMember.objects.filter(association=committee)
-
-    context = {
-        'committee': committee,
-        'members': members,
-        'core_members': core_members
-    }
-
-    print(context)  # Debugging
-
-    return render(request, 'committee_member.html', context)
 
 def club_member_view(request, pk):
-    club = get_object_or_404(Associations, pk=pk)
-
-    # Fetch all members and filter manually
-    all_members = Member.objects.all()
-    members = [member for member in all_members if pk in member.association]  # Assuming association is a list
-
-    # Fetch core members normally
-    core_members = CoreMember.objects.filter(association=club)
-
-    context = {
-        'club': club,
-        'members': members,
-        'core_members': core_members
-    }
-
-    print(context)  # Debugging
-
-    return render(request, 'club_member.html', context)
+    return _association_members(request, pk)
 
 
-def faculty_committee(request):
-    try:
-        user = request.user
-        user_profile = get_object_or_404(UserProfile, id=user)
-        faculty = Faculty.objects.get(id=user_profile)
-        
-        
-        from django.db.models import Q
-        associations = Associations.objects.filter(faculty_incharge=faculty)
-        
-        clubs = [a for a in associations if a.type == 'clubs']
-        committees = [a for a in associations if a.type == 'committees']
-                
-        request.session['url'] = 'faculty_committee'
-        content = {'clubs': clubs, 'comm': committees}
-        return render(request, 'committee.html', content)
-    
-
-    except (UserProfile.DoesNotExist, Faculty.DoesNotExist):
-        # Handle case where user isn't associated with faculty
-        content = {'clubs': [], 'comm': []}
-        return render(request, 'committee.html', content)
-
-@csrf_exempt  # Use this only if CSRF protection is disabled; otherwise, use CSRF token
-def search_students(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        query = data.get('query', '').lower()
-
-        students = UserProfile.objects.filter(
-            (Q(name__icontains=query) | Q(email__icontains=query)) & 
-            (Q(role='non_participant') | Q(role='member'))
-        )
-        student_list = [{'name': student.name, 'email': student.email} for student in students]
-
-        return JsonResponse({'students': student_list})
-
-    return JsonResponse({'error': 'Invalid request'}, status=400)
+@faculty_required
 def add_core_member_view(request):
+    faculty = get_faculty(request.user)
     if request.method == 'POST':
-        data = json.loads(request.body)
-        query = data.get('query', '').lower()
+        query = json.loads(request.body or '{}').get('query', '').strip()
+        if len(query) < 2:
+            return JsonResponse({'students': []})
+        students = (
+            UserProfile.objects.select_related('id')
+            .filter(Q(full_name__icontains=query) | Q(id__username__icontains=query) | Q(id__email__icontains=query))
+            .filter(role__in=[STUDENT, MEMBER])[:15]
+        )
+        return JsonResponse({'students': [
+            {'id': s.id.username, 'name': s.display_name, 'email': s.id.email, 'status': s.get_role_display()}
+            for s in students
+        ]})
 
-        if query:
-            # Filter users based on username OR email
-            users = get_user_model().objects.filter(Q(username__icontains=query) | Q(email__icontains=query))
+    my_associations = Associations.objects.filter(faculty_incharge=faculty).order_by('name')
+    return render(request, 'faculty/add_core_member.html', {
+        'associations': my_associations,
+        'core_members': CoreMember.objects.filter(
+            Q(association__faculty_incharge=faculty) | Q(association__isnull=True)
+        ).select_related('id__id', 'association').order_by('association__name'),
+    })
 
-            # Get matching UserProfile records for these users
-            students = UserProfile.objects.filter(
-                Q(id__in=users.values_list('id', flat=True)) &
-                (Q(role='non_participating') | Q(role='member'))
-            )
 
-            # Serialize data
-            student_list = [{'id': student.id.username, 'name': student.full_name, 'email': student.id.email} for student in students]
-
-            return JsonResponse({'students': student_list})
-    
-    all_students = UserProfile.objects.all()
-    return render(request, 'add_core_member.html', {'all_students': all_students})
-
+@faculty_required
+@require_POST
 def select_student(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            student_id = data.get('student_id')
-
-            if not student_id:
-                return JsonResponse({'message': 'Student ID not provided'}, status=400)
-
-            # Fetch the student from the database (modify based on your model structure)
-            student = get_object_or_404(User, username=student_id)  # Assuming username is the student ID
-            student_user = get_object_or_404(UserProfile, id=student)
-            print(student_user)
-            student_user.role = 'core_member'
-            student_user.save()
-
-            # core_update = CoreMember.objects.create(id=student_user)
-            # core_update.save()
-            # Do something with the selected student (e.g., add to a list, update, etc.)
-            # Example: Returning student details
-            return JsonResponse({
-                'message': f'Student {student.username} selected successfully!',
-                'student': {
-                    'id': student.username,
-                    'email': student.email,
-                }
-            })
-
-        except User.DoesNotExist:
-            return JsonResponse({'message': 'Student not found'}, status=404)
-        except Exception as e:
-            return JsonResponse({'message': str(e)}, status=500)
-
-    return render(request, 'add_core_member.html')
-
-@login_required
-def approve_clubs(request):
-    if not request.user.is_authenticated:
-        return HttpResponse("You must be logged in")
-
+    faculty = get_faculty(request.user)
     try:
-        faculty_user = get_object_or_404(UserProfile, id=request.user)
-        faculty = get_object_or_404(Faculty, id=faculty_user)  
+        data = json.loads(request.body or '{}')
+    except json.JSONDecodeError:
+        return JsonResponse({'message': 'Invalid request.'}, status=400)
 
-        # Fetch pending requests
-        pending_clubs = Associations.objects.filter(status='pending', faculty_incharge=faculty)
-        delete_requests = Associations.objects.filter(status='delete_pending', faculty_incharge=faculty)
-        event_requests  = Event.objects.filter(status='pending', association__faculty_incharge=faculty)
+    student = UserProfile.objects.select_related('id').filter(id__username=data.get('student_id')).first()
+    if student is None:
+        return JsonResponse({'message': 'Student not found.'}, status=404)
+    if student.role not in (STUDENT, MEMBER):
+        return JsonResponse({'message': f"{student.display_name} is already {student.get_role_display().lower()}."}, status=400)
 
-        if request.method == "POST":
-            action = request.POST.get("action")
+    association = None
+    if data.get('association_id'):
+        association = Associations.objects.filter(pk=data['association_id'], faculty_incharge=faculty).first()
+        if association is None:
+            return JsonResponse({'message': 'You can only assign students to your own clubs and committees.'}, status=403)
 
-            if action in ["approve", "reject", "approve_delete"]:
-                club_id = request.POST.get("club_id")
-                club = get_object_or_404(Associations, id=club_id)
+    student.role = CORE_MEMBER
+    student.save()
+    core = CoreMember.objects.get(id=student)
+    if association:
+        core.association = association
+        core.save()
+        if association.owner_id is None:
+            association.owner = core
+            association.save(update_fields=['owner'])
 
-                # Ensure only assigned faculty can approve/reject
-                if club.faculty_incharge != faculty:
-                    return HttpResponse("You are not authorized to approve/reject this request.")
+    team = f" of {association.name}" if association else ''
+    notify([student], "You're now a core member",
+           f"{faculty.id.display_name} made you a core member{team}. "
+           + ("You can now manage your team's events." if association else
+              "You can now create your club or committee on CommUnity."),
+           link=reverse('dashboard'), kind='success')
+    return JsonResponse({
+        'message': f"{student.display_name} is now a core member{team}.",
+        'student': {'id': student.id.username, 'email': student.id.email},
+    })
 
-                if action == "approve":
-                    club.status = "approved"
-                elif action == "reject":
-                    if club.status == "delete_pending":
-                        club.status = "approved"
-                    else:
-                        club.status = "rejected"
-                elif action == "approve_delete":
-                    club.delete()
-                    return redirect("approve_clubs")
 
-                club.save()
+@faculty_required
+def approve_clubs(request):
+    faculty = get_faculty(request.user)
 
-            elif action in ["approve_event", "reject_event"]:
-                event_id = request.POST.get("event_id")
-                event = get_object_or_404(Event, id=event_id)
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        remarks = request.POST.get('remarks', '').strip()
+        tab = request.POST.get('tab', 'events')
 
-                # Ensure only assigned faculty can approve/reject
-                if event.association.faculty_incharge != faculty:
-                    return HttpResponse("You are not authorized to approve/reject this event.")
+        if action in ('approve', 'reject', 'approve_delete', 'reject_delete'):
+            association = get_object_or_404(Associations, id=request.POST.get('club_id'), faculty_incharge=faculty)
+            owner = association.owner or association.created_by
+            recipients = [owner.id] if owner else []
+            link = association.get_absolute_url()
+            reason = f"\n\nRemarks: {remarks}" if remarks else ''
 
-                if action == "approve_event":
-                    event.status = "approved"
-                    event.approved_by = faculty
+            if action == 'approve' and association.status == 'pending':
+                association.status = 'approved'
+                association.save(update_fields=['status'])
+                notify(recipients, f"{association.name} is approved",
+                       f"{faculty.id.display_name} approved “{association.name}”. You can now schedule events.{reason}",
+                       link=link, kind='success')
+                messages.success(request, f"“{association.name}” approved.")
+            elif action == 'reject' and association.status == 'pending':
+                association.status = 'rejected'
+                association.save(update_fields=['status'])
+                notify(recipients, f"{association.name} was not approved",
+                       f"{faculty.id.display_name} did not approve “{association.name}”.{reason}",
+                       link=link, kind='danger')
+                messages.warning(request, f"“{association.name}” rejected.")
+            elif action == 'approve_delete' and association.status == 'delete_pending':
+                name = association.name
+                team = [c.id for c in CoreMember.objects.filter(association=association).select_related('id')]
+                association.delete()
+                notify(team, f"{name} was deleted", f"{faculty.id.display_name} approved the deletion of “{name}”.",
+                       kind='danger')
+                messages.success(request, f"“{name}” deleted.")
+            elif action in ('reject_delete', 'reject') and association.status == 'delete_pending':
+                association.status = 'approved'
+                association.save(update_fields=['status'])
+                notify(recipients, f"Deletion declined: {association.name}",
+                       f"{faculty.id.display_name} kept “{association.name}” active.{reason}", link=link)
+                messages.info(request, f"“{association.name}” will stay active.")
+            else:
+                messages.error(request, "That request has already been handled.")
 
-                    # Try to add event to Google Calendar
-                    try:
-                        event.google_calendar_event_id = create_google_calendar_event(event)
-                        messages.success(request, f"Event '{event.title}' approved and added to Google Calendar!")
-                    except Exception as e:
-                        messages.error(request, f"Event approved but failed to add to Google Calendar: {e}")
+        elif action in ('approve_event', 'reject_event'):
+            event = get_object_or_404(Event, id=request.POST.get('event_id'), association__faculty_incharge=faculty)
+            ok, message = review_event(event, faculty, 'approve' if action == 'approve_event' else 'reject', remarks)
+            (messages.success if ok else messages.error)(request, message)
 
-                elif action == "reject_event":
-                    event.status = "rejected"
-                    messages.warning(request, f"Event '{event.title}' has been rejected.")
+        return redirect(f"{reverse('approve_clubs')}?tab={tab}")
 
-                event.save()
+    event_requests = list(
+        Event.objects.filter(status='pending', association__faculty_incharge=faculty)
+        .select_related('association', 'location', 'created_by__id').order_by('date_time')
+    )
+    for event in event_requests:
+        event.conflicts = [describe_conflict(c) for c in
+                           find_conflicts(event.date_time, event.duration, event.location, exclude_id=event.id)]
+        event.pending_clashes = find_conflicts(event.date_time, event.duration, event.location,
+                                               exclude_id=event.id, statuses=('pending',))
+        event.lock = locked_date_for(event.date_time)
 
-            return redirect("approve_clubs")
+    pending_clubs = Associations.objects.filter(status='pending', faculty_incharge=faculty).select_related('created_by__id')
+    delete_requests = Associations.objects.filter(status='delete_pending', faculty_incharge=faculty).select_related('owner__id')
+    tab = request.GET.get('tab') or (
+        'events' if event_requests else 'associations' if pending_clubs else 'deletions' if delete_requests else 'events'
+    )
+    return render(request, 'faculty/approvals.html', {
+        'event_requests': event_requests,
+        'pending_clubs': pending_clubs,
+        'delete_requests': delete_requests,
+        'history': EventLog.objects.filter(
+            event__association__faculty_incharge=faculty, action__in=['approved', 'rejected', 'cancelled']
+        ).select_related('event', 'actor').order_by('-created_at')[:15],
+        'tab': tab,
+        'faculty': faculty,
+    })
 
-        return render(request, "approve_clubs.html", {
-            "pending_clubs": pending_clubs,
-            "delete_requests": delete_requests,
-            "event_requests": event_requests,  # Make sure this is passed to the template
-            "faculty": faculty
-        })
 
-    except UserProfile.DoesNotExist:
-        return HttpResponse("User profile not found")
-    except Faculty.DoesNotExist:
-        return HttpResponse("Faculty profile not found")
-    
+@faculty_required
 def manage_faculty_lock_dates(request):
-    if request.method == "POST":
-        form = FacultyLockDateForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Date locked successfully!")
-            return redirect('manage_faculty_lock_dates')
-        else:
-            messages.error(request, "Error locking the date. Please check your input.")
+    faculty = get_faculty(request.user)
+    if not faculty.can_lock_dates:
+        messages.error(request, "Reserving dates needs permission from the administrator.")
+        return redirect('faculty')
 
-    lock_dates = FacultyLockDate.objects.all().order_by('locked_date')
-    form = FacultyLockDateForm()
-    return render(request, 'faculty_lock_date.html', {'lock_dates': lock_dates, 'form': form})
+    form = FacultyLockDateForm(request.POST or None)
+    if request.method == 'POST':
+        if request.POST.get('delete'):
+            FacultyLockDate.objects.filter(pk=request.POST['delete']).delete()
+            messages.success(request, "Date released. Events can be scheduled on it again.")
+            return redirect('manage_faculty_lock_dates')
+        if form.is_valid():
+            lock = form.save(commit=False)
+            lock.created_by = faculty
+            lock.save()
+            clashes = Event.objects.filter(status__in=['approved', 'pending'], date_time__date=lock.locked_date)
+            messages.success(request, f"{lock.locked_date:%d %b %Y} is now reserved.")
+            if clashes:
+                titles = ', '.join(f"“{e.title}”" for e in clashes)
+                messages.warning(request, f"Already scheduled on that day: {titles}. Review them with the organisers.")
+            return redirect('manage_faculty_lock_dates')
+
+    today = timezone.localdate()
+    upcoming = list(FacultyLockDate.objects.filter(locked_date__gte=today).select_related('created_by__id'))
+    for lock in upcoming:
+        lock.events = Event.objects.filter(status__in=['approved', 'pending'], date_time__date=lock.locked_date)
+    return render(request, 'faculty/lock_dates.html', {
+        'form': form,
+        'upcoming': upcoming,
+        'past': FacultyLockDate.objects.filter(locked_date__lt=today).order_by('-locked_date')[:8],
+    })
+
+
+@faculty_required
+def faculty_reports(request):
+    faculty = get_faculty(request.user)
+    events = [
+        e for e in Event.objects.filter(association__faculty_incharge=faculty, status='approved')
+        .select_related('association', 'location').order_by('-date_time')
+        if e.is_completed
+    ]
+    return render(request, 'faculty/reports.html', {
+        'submitted': [e for e in events if e.report_generated],
+        'due': [e for e in events if not e.report_generated],
+    })

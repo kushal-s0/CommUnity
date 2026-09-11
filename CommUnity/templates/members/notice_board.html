@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Notice board{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <span class="eyebrow">Updates</span>
+        <h1>Notice board</h1>
+        <p class="lead">Announcements from every club and committee.</p>
+    </div>
+    {% if nav_role == 'core_member' and nav_association %}
+        <a class="btn btn-primary" href="{% url 'add_announcement' %}"><i class="fa-solid fa-bullhorn"></i>Post announcement</a>
+    {% endif %}
+</div>
+
+<div class="layout-sidebar">
+    <div>
+        <form class="toolbar" method="get">
+            <div class="field" style="margin:0;min-width:260px">
+                <select name="club" onchange="this.form.submit()" aria-label="Filter by club or committee">
+                    <option value="">All clubs &amp; committees</option>
+                    {% for a in associations %}
+                        <option value="{{ a.pk }}"{% if club == a.pk|stringformat:"s" %} selected{% endif %}>{{ a.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <noscript><button class="btn btn-secondary" type="submit">Filter</button></noscript>
+        </form>
+
+        <div class="card">
+            {% for ann in page %}
+                <a class="notice" href="{% url 'announcement_details' ann.id %}">
+                    <span class="small muted row" style="gap:6px"><span class="cat-dot cat-{{ ann.club.category|lower }}"></span>{{ ann.club.name }} · {{ ann.created_at|date:"j M Y" }}</span>
+                    <strong>{{ ann.title }}</strong>
+                    <p>{{ ann.message|truncatewords:32 }}</p>
+                </a>
+            {% empty %}
+                {% include "partials/empty.html" with icon="fa-bullhorn" text="No announcements yet." %}
+            {% endfor %}
+        </div>
+
+        {% if page.has_other_pages %}
+            <nav class="pagination" aria-label="Pages">
+                {% if page.has_previous %}<a class="btn btn-secondary btn-sm" href="?club={{ club }}&amp;page={{ page.previous_page_number }}"><i class="fa-solid fa-arrow-left"></i>Newer</a>{% endif %}
+                <span class="current">Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+                {% if page.has_next %}<a class="btn btn-secondary btn-sm" href="?club={{ club }}&amp;page={{ page.next_page_number }}">Older<i class="fa-solid fa-arrow-right"></i></a>{% endif %}
+            </nav>
+        {% endif %}
+    </div>
+
+    <aside class="stack">
+        <section class="card">
+            <div class="card-head"><h3>Upcoming events</h3><a class="small" href="{% url 'event_list' %}">All</a></div>
+            <div class="card-body">
+                <div class="event-list">
+                    {% for event in upcoming %}{% include "partials/event_card.html" %}{% empty %}<p class="small muted" style="margin:0">No upcoming events.</p>{% endfor %}
+                </div>
+            </div>
+        </section>
+    </aside>
+</div>
+{% endblock %}

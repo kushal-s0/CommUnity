@@ -1,0 +1,7 @@
+{% load static %}
+<li>
+    <a class="google-btn" title="{{ attrs.name }}" href="{{ attrs.href }}">
+        {% if attrs.provider_id == 'google' %}<img src="{% static 'images/google.png' %}" alt="">{% endif %}
+        Continue with {{ attrs.name }}
+    </a>
+</li>

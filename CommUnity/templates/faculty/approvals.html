@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}Approvals{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <span class="eyebrow">Review queue</span>
+        <h1>Approvals</h1>
+        <p class="lead">Approve or reject requests from your clubs and committees. Organisers are notified instantly, with your remarks.</p>
+    </div>
+</div>
+
+<div data-tabs>
+    <div class="tabs" role="tablist">
+        <button class="tab" type="button" role="tab" data-tab="events" aria-controls="panel-events" aria-selected="{% if tab == 'events' %}true{% else %}false{% endif %}">Events <span class="count">{{ event_requests|length }}</span></button>
+        <button class="tab" type="button" role="tab" data-tab="associations" aria-controls="panel-associations" aria-selected="{% if tab == 'associations' %}true{% else %}false{% endif %}">New clubs &amp; committees <span class="count">{{ pending_clubs|length }}</span></button>
+        <button class="tab" type="button" role="tab" data-tab="deletions" aria-controls="panel-deletions" aria-selected="{% if tab == 'deletions' %}true{% else %}false{% endif %}">Deletion requests <span class="count">{{ delete_requests|length }}</span></button>
+        <button class="tab" type="button" role="tab" data-tab="history" aria-controls="panel-history" aria-selected="{% if tab == 'history' %}true{% else %}false{% endif %}">Recent decisions</button>
+    </div>
+</div>
+
+<div id="panel-events" role="tabpanel" {% if tab != 'events' %}hidden{% endif %}>
+    {% for event in event_requests %}
+        <article class="card" style="margin-bottom:16px">
+            <div class="card-body">
+                <div class="row between" style="align-items:flex-start">
+                    <div class="row" style="align-items:flex-start;gap:14px;flex-wrap:nowrap">
+                        <div class="date-block" aria-hidden="true"><span class="date-month">{{ event.date_time|date:"M" }}</span><span class="date-day">{{ event.date_time|date:"d" }}</span></div>
+                        <div>
+                            <h3 style="margin:0 0 4px"><a href="{% url 'event_details' event.id %}">{{ event.title }}</a></h3>
+                            <p class="small muted" style="margin:0">{{ event.association.name }} · submitted by {{ event.created_by.display_name }} {{ event.created_at|timesince }} ago</p>
+                        </div>
+                    </div>
+                    <span class="badge badge-pending"><span class="badge-dot"></span>Pending</span>
+                </div>
+                <div class="row small" style="margin:14px 0;gap:6px 18px;color:var(--ink-2)">
+                    <span><i class="fa-regular fa-clock"></i> {{ event.date_time|date:"D, j M Y · g:i A" }} – {{ event.end_time|date:"g:i A" }}</span>
+                    <span><i class="fa-solid fa-location-dot"></i> {{ event.location }}</span>
+                    {% if event.max_participants %}<span><i class="fa-solid fa-users"></i> {{ event.max_participants }} seats</span>{% endif %}
+                </div>
+                <p style="margin:0 0 14px">{{ event.description|truncatewords:60 }}</p>
+
+                {% for conflict in event.conflicts %}
+                    <div class="alert alert-danger"><i class="fa-solid fa-circle-exclamation"></i><div><p>{{ conflict }}</p></div></div>
+                {% endfor %}
+                {% if event.lock %}
+                    <div class="alert alert-danger"><i class="fa-solid fa-lock"></i><div><p>{{ event.lock.locked_date|date:"j M Y" }} is a reserved date{% if event.lock.reason %} ({{ event.lock.reason }}){% endif %}.</p></div></div>
+                {% endif %}
+                {% if event.pending_clashes %}
+                    <div class="alert alert-warning"><i class="fa-solid fa-triangle-exclamation"></i><div>
+                        <p>Competing request for the same venue and time:
+                            {% for c in event.pending_clashes %}“{{ c.title }}” ({{ c.association.name }}){% if not forloop.last %}, {% endif %}{% endfor %}.
+                            Approving one will block the other.</p>
+                    </div></div>
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="event_id" value="{{ event.id }}">
+                    <input type="hidden" name="tab" value="events">
+                    <div class="field">
+                        <label for="remarks-e{{ event.id }}">Remarks <span class="muted">(optional, sent to the organisers)</span></label>
+                        <textarea id="remarks-e{{ event.id }}" name="remarks" rows="2"></textarea>
+                    </div>
+                    <div class="row">
+                        <button class="btn btn-success" name="action" value="approve_event" type="submit"{% if event.conflicts or event.lock %} disabled title="Resolve the conflict first"{% endif %}><i class="fa-solid fa-check"></i>Approve</button>
+                        <button class="btn btn-danger" name="action" value="reject_event" type="submit"><i class="fa-solid fa-xmark"></i>Reject</button>
+                        <a class="btn btn-ghost" href="{% url 'event_details' event.id %}">Full details</a>
+                    </div>
+                </form>
+            </div>
+        </article>
+    {% empty %}
+        <div class="card">{% include "partials/empty.html" with icon="fa-circle-check" text="No events waiting for approval." %}</div>
+    {% endfor %}
+</div>
+
+<div id="panel-associations" role="tabpanel" {% if tab != 'associations' %}hidden{% endif %}>
+    {% for club in pending_clubs %}
+        <article class="card" style="margin-bottom:16px">
+            <div class="card-body">
+                <div class="row between" style="align-items:flex-start">
+                    <div>
+                        <h3 style="margin:0 0 4px"><a href="{{ club.get_absolute_url }}">{{ club.name }}</a></h3>
+                        <p class="small muted" style="margin:0">{{ club.get_type_display|slice:":-1" }} · {{ club.category_label }} · requested by {{ club.created_by.id.display_name|default:"—" }} on {{ club.created_at|date:"j M Y" }}</p>
+                    </div>
+                    <span class="badge badge-pending"><span class="badge-dot"></span>Pending</span>
+                </div>
+                <p style="margin:14px 0">{{ club.description|truncatewords:60 }}</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="club_id" value="{{ club.id }}">
+                    <input type="hidden" name="tab" value="associations">
+                    <div class="field">
+                        <label for="remarks-a{{ club.id }}">Remarks <span class="muted">(optional)</span></label>
+                        <textarea id="remarks-a{{ club.id }}" name="remarks" rows="2"></textarea>
+                    </div>
+                    <div class="row">
+                        <button class="btn btn-success" name="action" value="approve" type="submit"><i class="fa-solid fa-check"></i>Approve</button>
+                        <button class="btn btn-danger" name="action" value="reject" type="submit"><i class="fa-solid fa-xmark"></i>Reject</button>
+                    </div>
+                </form>
+            </div>
+        </article>
+    {% empty %}
+        <div class="card">{% include "partials/empty.html" with icon="fa-people-group" text="No new club or committee requests." %}</div>
+    {% endfor %}
+</div>
+
+<div id="panel-deletions" role="tabpanel" {% if tab != 'deletions' %}hidden{% endif %}>
+    {% for club in delete_requests %}
+        <article class="card" style="margin-bottom:16px">
+            <div class="card-body">
+                <div class="row between" style="align-items:flex-start">
+                    <div>
+                        <h3 style="margin:0 0 4px"><a href="{{ club.get_absolute_url }}">{{ club.name }}</a></h3>
+                        <p class="small muted" style="margin:0">Requested by {{ club.owner.id.display_name|default:"the owner" }}</p>
+                    </div>
+                    <span class="badge badge-delete_pending">Deletion requested</span>
+                </div>
+                <div class="alert alert-danger" style="margin-top:14px"><i class="fa-solid fa-triangle-exclamation"></i><div>
+                    <p>Approving permanently deletes {{ club.name }} with all its events and reports.</p>
+                </div></div>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="club_id" value="{{ club.id }}">
+                    <input type="hidden" name="tab" value="deletions">
+                    <div class="row">
+                        <button class="btn btn-danger" name="action" value="approve_delete" type="submit" onclick="return confirm('Permanently delete {{ club.name|escapejs }}?')"><i class="fa-solid fa-trash"></i>Delete permanently</button>
+                        <button class="btn btn-secondary" name="action" value="reject_delete" type="submit">Keep it active</button>
+                    </div>
+                </form>
+            </div>
+        </article>
+    {% empty %}
+        <div class="card">{% include "partials/empty.html" with icon="fa-trash-can" text="No deletion requests." %}</div>
+    {% endfor %}
+</div>
+
+<div id="panel-history" role="tabpanel" {% if tab != 'history' %}hidden{% endif %}>
+    <div class="card">
+        {% if history %}
+            <div class="table-wrap">
+                <table class="table">
+                    <thead><tr><th>Event</th><th>Decision</th><th>By</th><th>When</th><th>Remarks</th></tr></thead>
+                    <tbody>
+                    {% for log in history %}
+                        <tr>
+                            <td><a class="title-link" href="{% url 'event_details' log.event.id %}">{{ log.event.title }}</a></td>
+                            <td><span class="badge badge-{% if log.action == 'approved' %}approved{% elif log.action == 'rejected' %}rejected{% else %}cancelled{% endif %}">{{ log.get_action_display }}</span></td>
+                            <td>{{ log.actor.display_name|default:"—" }}</td>
+                            <td class="nowrap">{{ log.created_at|date:"j M Y" }}</td>
+                            <td class="small">{{ log.note|default:"—"|truncatechars:90 }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            {% include "partials/empty.html" with icon="fa-clock-rotate-left" text="No decisions yet." %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

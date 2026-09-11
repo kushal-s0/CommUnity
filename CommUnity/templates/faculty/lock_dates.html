@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Reserved dates{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <span class="eyebrow">Academic calendar</span>
+        <h1>Reserved dates</h1>
+        <p class="lead">No events can be requested or approved on reserved dates — use them for exams, fests and holidays.</p>
+    </div>
+</div>
+
+<div class="layout-sidebar">
+    <section class="card">
+        <div class="card-head"><h2>Upcoming reserved dates</h2></div>
+        <ul class="list">
+            {% for lock in upcoming %}
+                <li class="list-item">
+                    <div class="date-block" aria-hidden="true"><span class="date-month">{{ lock.locked_date|date:"M" }}</span><span class="date-day">{{ lock.locked_date|date:"d" }}</span></div>
+                    <div class="list-item-body">
+                        <span class="list-item-title">{{ lock.reason|default:"Reserved" }}</span>
+                        <span class="small muted">{{ lock.locked_date|date:"l, j F Y" }}{% if lock.created_by %} · by {{ lock.created_by.id.display_name }}{% endif %}</span>
+                        {% if lock.events %}
+                            <span class="small" style="color:var(--warning);display:block;margin-top:2px">
+                                <i class="fa-solid fa-triangle-exclamation"></i> Already scheduled:
+                                {% for e in lock.events %}<a href="{% url 'event_details' e.id %}">{{ e.title }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+                            </span>
+                        {% endif %}
+                    </div>
+                    <form method="post" data-confirm="Release this date? Events can be booked on it again.">
+                        {% csrf_token %}
+                        <button class="btn btn-ghost btn-sm" name="delete" value="{{ lock.pk }}" type="submit">Release</button>
+                    </form>
+                </li>
+            {% empty %}
+                <li>{% include "partials/empty.html" with icon="fa-lock-open" text="No reserved dates coming up." %}</li>
+            {% endfor %}
+        </ul>
+        {% if past %}
+            <div class="card-foot small muted">
+                Past: {% for lock in past %}{{ lock.locked_date|date:"j M Y" }}{% if lock.reason %} ({{ lock.reason }}){% endif %}{% if not forloop.last %} · {% endif %}{% endfor %}
+            </div>
+        {% endif %}
+    </section>
+
+    <aside class="card sticky">
+        <div class="card-head"><h3>Reserve a date</h3></div>
+        <form method="post" class="card-body">
+            {% csrf_token %}
+            {% include "partials/form_errors.html" %}
+            {% for field in form %}{% include "partials/field.html" %}{% endfor %}
+            <button class="btn btn-primary btn-block" type="submit"><i class="fa-solid fa-lock"></i>Reserve date</button>
+        </form>
+    </aside>
+</div>
+{% endblock %}

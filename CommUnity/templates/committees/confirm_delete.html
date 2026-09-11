@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Delete {{ association.name }}{% endblock %}
+
+{% block content %}
+<div class="container-narrow" style="margin:0 auto">
+    <div class="card">
+        <div class="card-body stack" style="align-items:flex-start">
+            <span class="empty-icon" style="background:var(--danger-bg);color:var(--danger)"><i class="fa-solid fa-triangle-exclamation"></i></span>
+            <h1 style="margin:0">Delete {{ association.name }}?</h1>
+            <p class="muted" style="margin:0">
+                Your request goes to {{ association.faculty_incharge.id.display_name }}. If they approve it, this
+                {{ association.get_type_display|slice:":-1"|lower }}, its events and their reports are removed permanently.
+                Until then everything stays as it is.
+            </p>
+            <form method="post" class="row">
+                {% csrf_token %}
+                <a class="btn btn-ghost" href="{{ association.get_absolute_url }}">Keep it</a>
+                <button class="btn btn-danger" type="submit"><i class="fa-solid fa-trash"></i>Send deletion request</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

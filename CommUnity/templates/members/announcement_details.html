@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ announcement.title }}{% endblock %}
+
+{% block content %}
+<div class="container-narrow" style="margin:0 auto">
+    <a class="back-link" href="{% url 'notice_board' %}"><i class="fa-solid fa-arrow-left"></i> Notice board</a>
+    <article class="card">
+        <div class="card-body" style="padding:32px">
+            <div class="row" style="margin-bottom:12px">
+                <a class="chip" href="{{ announcement.club.get_absolute_url }}"><span class="cat-dot cat-{{ announcement.club.category|lower }}"></span>{{ announcement.club.name }}</a>
+                <span class="small muted">{{ announcement.created_at|date:"l, j F Y · g:i A" }}</span>
+            </div>
+            <h1>{{ announcement.title }}</h1>
+            <div class="prose"><p>{{ announcement.message }}</p></div>
+            <hr>
+            <div class="row between">
+                <div class="person">
+                    {% include "partials/avatar.html" with profile=announcement.created_by size="sm" %}
+                    <div class="person-text"><strong>{{ announcement.created_by.display_name }}</strong><span class="small muted">for {{ announcement.club.name }}</span></div>
+                </div>
+                {% if can_delete %}
+                    <form method="post" action="{% url 'delete_announcement' announcement.id %}" data-confirm="Delete this announcement?">
+                        {% csrf_token %}
+                        <button class="btn btn-danger btn-sm" type="submit"><i class="fa-solid fa-trash"></i>Delete</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </article>
+
+    {% if more %}
+        <section class="section">
+            <div class="section-head"><h2>More from {{ announcement.club.name }}</h2></div>
+            <div class="card">
+                {% for a in more %}
+                    <a class="notice" href="{% url 'announcement_details' a.id %}">
+                        <span class="small muted">{{ a.created_at|date:"j M Y" }}</span>
+                        <strong>{{ a.title }}</strong>
+                        <p>{{ a.message|truncatewords:20 }}</p>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+</div>
+{% endblock %}
