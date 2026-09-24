@@ -60,7 +60,7 @@ Every view is protected by a role decorator (`Login/permissions.py`); only `@som
 
 ### AI-powered post-event reports
 - After an event, organisers answer a short form (speakers, agenda, outcomes, feedback…).
-- **Claude** (Anthropic) drafts a formal, sectioned report using only the facts provided; the organiser reviews and edits it.
+- **Claude** (Anthropic) drafts a formal, sectioned report using only the facts provided; the organiser reviews and edits it. this will be changed to the normal free api work in progess stay there 
 - A branded **PDF** is generated for the college records. Faculty see every submitted report and which ones are still due.
 - Works without an API key too: an offline template builds a structured draft from the same answers.
 
@@ -150,3 +150,5 @@ CommUnity/
   <a href="https://github.com/aditya-s27">Aditya</a>
 </p>
 <p align="center">⭐ Give this project a star if you like it!</p>
+
+Thanks You
